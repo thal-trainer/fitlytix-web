@@ -403,21 +403,37 @@
 
   async function init() {
     const hash = window.location.hash;
-    const params = new URLSearchParams(hash.replace('#', '?'));
-    const accessToken = params.get('access_token');
-    const type = params.get('type');
-
+    const search = window.location.search;
+    const hashParams = new URLSearchParams(hash.replace('#', ''));
+    const searchParams = new URLSearchParams(search);
+  
+    const accessToken = hashParams.get('access_token') || searchParams.get('access_token');
+    const token = searchParams.get('token');
+    const type = hashParams.get('type') || searchParams.get('type');
+  
     document.getElementById('loading-state').style.display = 'none';
-
+  
+    if (token && type === 'invite') {
+      try {
+        const { data, error } = await supabase.auth.verifyOtp({
+          token_hash: token,
+          type: 'invite',
+        });
+        if (error) throw error;
+        document.getElementById('invite-state').style.display = 'block';
+      } catch(e) {
+        document.getElementById('invite-state').style.display = 'block';
+      }
+      return;
+    }
+  
     if (accessToken && (type === 'invite' || type === 'recovery' || type === 'signup')) {
       try {
         const { data, error } = await supabase.auth.setSession({
           access_token: accessToken,
-          refresh_token: params.get('refresh_token') ?? '',
+          refresh_token: hashParams.get('refresh_token') || '',
         });
-
         if (error) throw error;
-
         const user = data?.user;
         if (user?.user_metadata?.gym_id) {
           const { data: gymData } = await supabase
@@ -425,20 +441,19 @@
             .select('name')
             .eq('id', user.user_metadata.gym_id)
             .single();
-
           if (gymData?.name) {
             document.getElementById('gym-name-text').textContent = gymData.name.toUpperCase();
             document.getElementById('gym-badge').style.display = 'inline-flex';
           }
         }
-
         document.getElementById('invite-state').style.display = 'block';
-      } catch (e) {
+      } catch(e) {
         document.getElementById('invite-state').style.display = 'block';
       }
-    } else {
-      document.getElementById('default-state').style.display = 'block';
+      return;
     }
+  
+    document.getElementById('default-state').style.display = 'block';
   }
 
   async function setPassword() {
