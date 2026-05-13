@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FITLYTIX — Trainer Platform</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #000000;
+      --card: #141414;
+      --border: #222222;
+      --accent: #C4A8C8;
+      --accent-dim: rgba(196, 168, 200, 0.12);
+      --text: #ffffff;
+      --text-secondary: #aaaaaa;
+      --text-muted: #666666;
+      --success: #27AE60;
+      --danger: #C0392B;
+      --input-bg: #0a0a0a;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(ellipse at 60% 20%, rgba(196,168,200,0.04) 0%, transparent 60%),
+                  radial-gradient(ellipse at 20% 80%, rgba(196,168,200,0.03) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+      z-index: 1;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo-section {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .logo-wordmark {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 52px;
+      letter-spacing: 6px;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .logo-wordmark span {
+      color: var(--accent);
+    }
+
+    .logo-bar {
+      width: 48px;
+      height: 2px;
+      background: var(--accent);
+      margin: 10px auto 8px;
+    }
+
+    .logo-sub {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 1px;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    .gym-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      padding: 4px 10px;
+      margin-bottom: 24px;
+    }
+
+    .gym-badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .gym-badge-text {
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 1px;
+      font-weight: 500;
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .input-field {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-field:focus {
+      border-color: var(--accent);
+    }
+
+    .input-field::placeholder {
+      color: var(--text-muted);
+    }
+
+    .btn {
+      width: 100%;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      padding: 15px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      margin-top: 8px;
+    }
+
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .error-msg {
+      background: rgba(192, 57, 43, 0.12);
+      border: 1px solid var(--danger);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #e74c3c;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .success-state {
+      text-align: center;
+      padding: 16px 0;
+      display: none;
+    }
+
+    .success-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(39, 174, 96, 0.12);
+      border: 1px solid var(--success);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+
+    .success-icon svg { display: block; }
+
+    .success-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 1px;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .success-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    .success-steps {
+      text-align: left;
+      background: rgba(196,168,200,0.06);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .success-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .success-step:last-child { margin-bottom: 0; }
+
+    .step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 500;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .step-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .default-state {
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    .default-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 1px;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .default-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(0,0,0,0.3);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="logo-section">
+    <div class="logo-wordmark">FITLYT<span>I</span>X</div>
+    <div class="logo-bar"></div>
+    <div class="logo-sub">Trainer Platform</div>
+  </div>
+
+  <div class="card" id="main-card">
+
+    <div id="loading-state" style="text-align:center; padding: 20px 0;">
+      <div class="loading" style="width:20px;height:20px;border-color:rgba(196,168,200,0.3);border-top-color:var(--accent);"></div>
+    </div>
+
+    <div id="invite-state" style="display:none;">
+      <div class="card-title">You've been invited</div>
+      <div class="card-desc">Set your password to join your gym on FITLYTIX.</div>
+      <div class="gym-badge" id="gym-badge" style="display:none;">
+        <div class="gym-badge-dot"></div>
+        <span class="gym-badge-text" id="gym-name-text">Your Gym</span>
+      </div>
+      <div class="error-msg" id="error-msg"></div>
+      <div class="input-group">
+        <label class="input-label">NEW PASSWORD</label>
+        <input type="password" class="input-field" id="password" placeholder="Minimum 8 characters" />
+      </div>
+      <div class="input-group">
+        <label class="input-label">CONFIRM PASSWORD</label>
+        <input type="password" class="input-field" id="confirm-password" placeholder="Re-enter your password" />
+      </div>
+      <button class="btn" id="set-password-btn" onclick="setPassword()">SET PASSWORD</button>
+    </div>
+
+    <div id="success-state" class="success-state">
+      <div class="success-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M5 12L10 17L20 7" stroke="#27AE60" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="success-title">Password Set!</div>
+      <div class="success-desc">Your account is ready. Open the FITLYTIX app to log in with your email and new password.</div>
+      <div class="success-steps">
+        <div class="success-step">
+          <div class="step-num">1</div>
+          <div class="step-text">Open the FITLYTIX app on your phone</div>
+        </div>
+        <div class="success-step">
+          <div class="step-num">2</div>
+          <div class="step-text">Enter your email and the password you just set</div>
+        </div>
+        <div class="success-step">
+          <div class="step-num">3</div>
+          <div class="step-text">Start training your clients</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="default-state" class="default-state" style="display:none;">
+      <div class="default-title">Welcome to FITLYTIX</div>
+      <div class="default-desc">This page is for trainer onboarding. If you received an invitation email, please use the link in that email.</div>
+    </div>
+
+  </div>
+
+  <div class="footer">© 2026 FITLYTIX. All rights reserved.</div>
+
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://fsbnfvjqndcevygqhxkt.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYm5mdmpxbmRjZXZ5Z3FoeGt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU3MjkwODksImV4cCI6MjA2MTMwNTA4OX0.GdDmABkgcSAqBSMDrjSiWbUmlkMJYLOwsHAzFslpv-g';
+
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  async function init() {
+    const hash = window.location.hash;
+    const params = new URLSearchParams(hash.replace('#', '?'));
+    const accessToken = params.get('access_token');
+    const type = params.get('type');
+
+    document.getElementById('loading-state').style.display = 'none';
+
+    if (accessToken && (type === 'invite' || type === 'recovery' || type === 'signup')) {
+      try {
+        const { data, error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: params.get('refresh_token') ?? '',
+        });
+
+        if (error) throw error;
+
+        const user = data?.user;
+        if (user?.user_metadata?.gym_id) {
+          const { data: gymData } = await supabase
+            .from('gyms')
+            .select('name')
+            .eq('id', user.user_metadata.gym_id)
+            .single();
+
+          if (gymData?.name) {
+            document.getElementById('gym-name-text').textContent = gymData.name.toUpperCase();
+            document.getElementById('gym-badge').style.display = 'inline-flex';
+          }
+        }
+
+        document.getElementById('invite-state').style.display = 'block';
+      } catch (e) {
+        document.getElementById('invite-state').style.display = 'block';
+      }
+    } else {
+      document.getElementById('default-state').style.display = 'block';
+    }
+  }
+
+  async function setPassword() {
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm-password').value;
+    const errorEl = document.getElementById('error-msg');
+    const btn = document.getElementById('set-password-btn');
+
+    errorEl.style.display = 'none';
+
+    if (!password || password.length < 8) {
+      errorEl.textContent = 'Password must be at least 8 characters.';
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    if (password !== confirm) {
+      errorEl.textContent = 'Passwords do not match.';
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading"></span>SETTING PASSWORD...';
+
+    const { error } = await supabase.auth.updateUser({ password });
+
+    if (error) {
+      errorEl.textContent = error.message;
+      errorEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'SET PASSWORD';
+    } else {
+      document.getElementById('invite-state').style.display = 'none';
+      document.getElementById('success-state').style.display = 'block';
+    }
+  }
+
+  init();
+</script>
+
+</body>
+</html>
