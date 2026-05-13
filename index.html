@@ -402,6 +402,7 @@
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   async function init() {
+    document.getElementById('loading-state').style.display = 'none';
     const hash = window.location.hash;
     const search = window.location.search;
     const hashParams = new URLSearchParams(hash.replace('#', ''));
@@ -492,7 +493,7 @@
     }
   }
 
-  init();
+  window.addEventListener('load', init);
 </script>
 
 </body>
