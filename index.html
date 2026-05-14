@@ -399,43 +399,93 @@
   const SUPABASE_URL = 'https://fsbnfvjqndcevygqhxkt.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYm5mdmpxbmRjZXZ5Z3FoeGt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU3MjkwODksImV4cCI6MjA2MTMwNTA4OX0.GdDmABkgcSAqBSMDrjSiWbUmlkMJYLOwsHAzFslpv-g';
   
-  document.getElementById('loading-state').style.display = 'none';
-  document.getElementById('default-state').style.display = 'block';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+      detectSessionInUrl: true,
+      flowType: 'implicit',
+    }
+  });
   
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  document.getElementById('loading-state').style.display = 'none';
   
   async function init() {
-    document.getElementById('default-state').style.display = 'none';
-    
-    const search = window.location.search;
-    const hash = window.location.hash;
-    const searchParams = new URLSearchParams(search);
-    const hashParams = new URLSearchParams(hash.replace('#', ''));
+    const { data: { session }, error } = await supabase.auth.getSession();
   
-    const token = searchParams.get('token');
-    const accessToken = hashParams.get('access_token') || searchParams.get('access_token');
-    const type = hashParams.get('type') || searchParams.get('type');
-  
-    if (token) {
-      try {
-        await supabase.auth.verifyOtp({ token_hash: token, type: 'invite' });
-      } catch(e) {}
+    if (session) {
       document.getElementById('invite-state').style.display = 'block';
       return;
     }
   
+    const hash = window.location.hash;
+    const search = window.location.search;
+    const hashParams = new URLSearchParams(hash.replace('#', ''));
+    const searchParams = new URLSearchParams(search);
+  
+    const accessToken = hashParams.get('access_token') || searchParams.get('access_token');
+    const type = hashParams.get('type') || searchParams.get('type');
+    const token = searchParams.get('token');
+  
     if (accessToken) {
-      try {
-        await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: hashParams.get('refresh_token') || '',
-        });
-      } catch(e) {}
-      document.getElementById('invite-state').style.display = 'block';
-      return;
+      const { data, error: sessionError } = await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: hashParams.get('refresh_token') || searchParams.get('refresh_token') || '',
+      });
+  
+      if (!sessionError && data.session) {
+        document.getElementById('invite-state').style.display = 'block';
+        return;
+      }
+    }
+  
+    if (token) {
+      const { error: otpError } = await supabase.auth.verifyOtp({
+        token_hash: token,
+        type: 'invite',
+      });
+  
+      if (!otpError) {
+        document.getElementById('invite-state').style.display = 'block';
+        return;
+      }
     }
   
     document.getElementById('default-state').style.display = 'block';
+  }
+  
+  async function setPassword() {
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm-password').value;
+    const errorEl = document.getElementById('error-msg');
+    const btn = document.getElementById('set-password-btn');
+  
+    errorEl.style.display = 'none';
+  
+    if (!password || password.length < 8) {
+      errorEl.textContent = 'Password must be at least 8 characters.';
+      errorEl.style.display = 'block';
+      return;
+    }
+  
+    if (password !== confirm) {
+      errorEl.textContent = 'Passwords do not match.';
+      errorEl.style.display = 'block';
+      return;
+    }
+  
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading"></span>SETTING PASSWORD...';
+  
+    const { error } = await supabase.auth.updateUser({ password });
+  
+    if (error) {
+      errorEl.textContent = error.message;
+      errorEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'SET PASSWORD';
+    } else {
+      document.getElementById('invite-state').style.display = 'none';
+      document.getElementById('success-state').style.display = 'block';
+    }
   }
   
   window.addEventListener('load', init);
