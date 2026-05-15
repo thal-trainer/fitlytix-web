@@ -1,95 +1,550 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <title>FITLYTIX</title>
-</head>
-<body style="background:#000;color:#fff;font-family:sans-serif;padding:40px;">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FITLYTIX — Trainer Platform</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  <h1>FITLYTIX</h1>
-  <div id="status">Initializing...</div>
-  <div id="form" style="display:none;">
-    <p>Set your password</p>
-    <input type="password" id="pw" placeholder="New password" style="display:block;margin:10px 0;padding:10px;width:300px;background:#111;color:#fff;border:1px solid #333;"/>
-    <input type="password" id="pw2" placeholder="Confirm password" style="display:block;margin:10px 0;padding:10px;width:300px;background:#111;color:#fff;border:1px solid #333;"/>
-    <button id="set-btn" style="padding:10px 20px;background:#C4A8C8;border:none;cursor:pointer;font-weight:bold;">SET PASSWORD</button>
-    <p id="msg" style="margin-top:10px;"></p>
+    :root {
+      --bg: #000000;
+      --card: #141414;
+      --border: #222222;
+      --accent: #C4A8C8;
+      --accent-dim: rgba(196, 168, 200, 0.12);
+      --text: #ffffff;
+      --text-secondary: #aaaaaa;
+      --text-muted: #555555;
+      --success: #27AE60;
+      --danger: #C0392B;
+      --input-bg: #0d0d0d;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(ellipse at 70% 10%, rgba(196,168,200,0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 10% 90%, rgba(196,168,200,0.04) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+      z-index: 1;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo-section {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo-img {
+      width: 160px;
+      height: auto;
+      margin-bottom: 8px;
+    }
+
+    .logo-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      margin-bottom: 20px;
+    }
+
+    /* Loading */
+    .loading-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 0;
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 2px solid rgba(196,168,200,0.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    /* Invite state */
+    .invite-heading {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 30px;
+      letter-spacing: 1px;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .invite-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .gym-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent-dim);
+      border: 1px solid rgba(196,168,200,0.3);
+      border-radius: 6px;
+      padding: 5px 10px;
+      margin-bottom: 20px;
+    }
+
+    .gym-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .gym-name {
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 1.5px;
+      font-weight: 500;
+    }
+
+    .input-group { margin-bottom: 14px; }
+
+    .input-label {
+      display: block;
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-field {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 44px 13px 14px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-field:focus { border-color: var(--accent); }
+    .input-field::placeholder { color: var(--text-muted); }
+
+    .toggle-pw {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 12px;
+      padding: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .toggle-pw:hover { color: var(--text-secondary); }
+
+    .error-msg {
+      background: rgba(192,57,43,0.1);
+      border: 1px solid rgba(192,57,43,0.4);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #e74c3c;
+      margin-bottom: 14px;
+      display: none;
+    }
+
+    .btn {
+      width: 100%;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-spinner {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(0,0,0,0.2);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: none;
+    }
+
+    /* Success state */
+    .success-wrap {
+      text-align: center;
+      padding: 8px 0;
+      display: none;
+    }
+
+    .success-icon {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: rgba(39,174,96,0.1);
+      border: 1px solid rgba(39,174,96,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+
+    .success-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .success-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .steps {
+      text-align: left;
+      background: rgba(196,168,200,0.05);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .step:last-child { margin-bottom: 0; }
+
+    .step-num {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      border: 1px solid rgba(196,168,200,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: var(--accent);
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .step-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      padding-top: 2px;
+    }
+
+    /* Default state */
+    .default-wrap {
+      text-align: center;
+      padding: 8px 0;
+      display: none;
+    }
+
+    .default-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .default-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="logo-section">
+    <img src="logo.png" alt="FITLYTIX" class="logo-img" />
+    <div class="logo-sub">Trainer Platform</div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const { createClient } = supabase;
-  
-    const client = createClient(
-      'https://fsbnfvjqndcevygqhxkt.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYm5mdmpxbmRjZXZ5Z3FoeGt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMTM3NTMsImV4cCI6MjA5MjY4OTc1M30.5GkQPCbaaD5SGBDmWjsp1bLQ8gZHnJ0Ez2xJN0neOgg',
-      { auth: { detectSessionInUrl: true, flowType: 'implicit', persistSession: true } }
-    );
-  
-    async function init() {
-      document.getElementById('status').textContent = 'Checking...';
-  
-      const hash = window.location.hash.replace('#', '');
-      const params = new URLSearchParams(hash);
-      const accessToken = params.get('access_token');
-      const refreshToken = params.get('refresh_token');
-  
-      if (accessToken) {
-        const { data, error } = await client.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken || '',
-        });
-  
-        if (error) {
-          document.getElementById('status').textContent = 'Error: ' + error.message;
-          return;
-        }
-  
-        if (data.session) {
-          document.getElementById('status').textContent = 'Ready to set password';
-          document.getElementById('form').style.display = 'block';
-          return;
-        }
-      }
-  
-      document.getElementById('status').textContent = 'No valid session. Please use the invite link from your email.';
+  <div class="card">
+
+    <!-- Loading -->
+    <div id="loading-state" class="loading-wrap">
+      <div class="spinner"></div>
+      <div class="loading-text">VERIFYING INVITE</div>
+    </div>
+
+    <!-- Invite / Set Password -->
+    <div id="invite-state" style="display:none;">
+      <div class="invite-heading">You've been invited</div>
+      <div class="invite-desc">Set your password to start training on FITLYTIX.</div>
+      <div class="gym-badge" id="gym-badge" style="display:none;">
+        <div class="gym-dot"></div>
+        <span class="gym-name" id="gym-name-text">Your Gym</span>
+      </div>
+      <div class="divider"></div>
+      <div class="error-msg" id="error-msg"></div>
+      <div class="input-group">
+        <label class="input-label">New Password</label>
+        <div class="input-wrap">
+          <input type="password" class="input-field" id="pw" placeholder="Minimum 8 characters" />
+          <button class="toggle-pw" onclick="togglePw('pw', this)" type="button">SHOW</button>
+        </div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Confirm Password</label>
+        <div class="input-wrap">
+          <input type="password" class="input-field" id="pw2" placeholder="Re-enter your password" />
+          <button class="toggle-pw" onclick="togglePw('pw2', this)" type="button">SHOW</button>
+        </div>
+      </div>
+      <button class="btn" id="set-btn">
+        <span class="btn-spinner" id="btn-spinner"></span>
+        <span id="btn-text">SET PASSWORD</span>
+      </button>
+    </div>
+
+    <!-- Success -->
+    <div id="success-state" class="success-wrap">
+      <div class="success-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M5 12L10 17L20 7" stroke="#27AE60" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="success-title">Password Set!</div>
+      <div class="success-desc">Your account is ready. Open the FITLYTIX app and log in with your email and new password.</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text">Open the FITLYTIX app on your phone</div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text">Enter your email and the password you just set</div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text">Start managing your clients</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Default -->
+    <div id="default-state" class="default-wrap">
+      <div class="default-title">Welcome to FITLYTIX</div>
+      <div class="default-desc">This page is for trainer onboarding. Please use the invitation link sent to your email.</div>
+    </div>
+
+  </div>
+
+  <div class="footer">© 2026 FITLYTIX. All rights reserved.</div>
+
+</div>
+
+<script>
+  const { createClient } = supabase;
+
+  const client = createClient(
+    'https://fsbnfvjqndcevygqhxkt.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYm5mdmpxbmRjZXZ5Z3FoeGt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMTM3NTMsImV4cCI6MjA5MjY4OTc1M30.5GkQPCbaaD5SGBDmWjsp1bLQ8gZHnJ0Ez2xJN0neOgg',
+    { auth: { detectSessionInUrl: true, flowType: 'implicit', persistSession: true } }
+  );
+
+  function show(id) {
+    ['loading-state','invite-state','success-state','default-state'].forEach(s => {
+      document.getElementById(s).style.display = s === id ? (s === 'success-state' || s === 'default-state' ? 'block' : 'block') : 'none';
+    });
+  }
+
+  function togglePw(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+      input.type = 'text';
+      btn.textContent = 'HIDE';
+    } else {
+      input.type = 'password';
+      btn.textContent = 'SHOW';
     }
-  
-    document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('set-btn').addEventListener('click', async function() {
-        const pw = document.getElementById('pw').value;
-        const pw2 = document.getElementById('pw2').value;
-        const msg = document.getElementById('msg');
-  
-        msg.textContent = 'Processing...';
-  
-        if (pw.length < 8) {
-          msg.textContent = 'Password must be at least 8 characters';
-          return;
+  }
+
+  async function init() {
+    const hash = window.location.hash.replace('#', '');
+    const params = new URLSearchParams(hash);
+    const accessToken = params.get('access_token');
+    const refreshToken = params.get('refresh_token');
+
+    if (accessToken) {
+      const { data, error } = await client.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken || '',
+      });
+
+      if (error) {
+        show('default-state');
+        return;
+      }
+
+      if (data.session) {
+        const user = data.session.user;
+        if (user?.user_metadata?.gym_id) {
+          const { data: gymData } = await client
+            .from('gyms')
+            .select('name')
+            .eq('id', user.user_metadata.gym_id)
+            .single();
+          if (gymData?.name) {
+            document.getElementById('gym-name-text').textContent = gymData.name.toUpperCase();
+            document.getElementById('gym-badge').style.display = 'inline-flex';
+          }
         }
-        if (pw !== pw2) {
-          msg.textContent = 'Passwords do not match';
-          return;
-        }
-  
-        const { error } = await client.auth.updateUser({ password: pw });
-  
-        if (error) {
-          msg.textContent = 'Error: ' + error.message;
-        } else {
-          // Update trainer_invites status to accepted
+        show('invite-state');
+        return;
+      }
+    }
+
+    show('default-state');
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('set-btn').addEventListener('click', async function() {
+      const pw = document.getElementById('pw').value;
+      const pw2 = document.getElementById('pw2').value;
+      const errorEl = document.getElementById('error-msg');
+      const spinner = document.getElementById('btn-spinner');
+      const btnText = document.getElementById('btn-text');
+      const btn = document.getElementById('set-btn');
+
+      errorEl.style.display = 'none';
+
+      if (pw.length < 8) {
+        errorEl.textContent = 'Password must be at least 8 characters.';
+        errorEl.style.display = 'block';
+        return;
+      }
+      if (pw !== pw2) {
+        errorEl.textContent = 'Passwords do not match.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      spinner.style.display = 'block';
+      btnText.textContent = 'SETTING PASSWORD...';
+
+      const { error } = await client.auth.updateUser({ password: pw });
+
+      if (error) {
+        errorEl.textContent = error.message;
+        errorEl.style.display = 'block';
+        btn.disabled = false;
+        spinner.style.display = 'none';
+        btnText.textContent = 'SET PASSWORD';
+      } else {
+        const { data: { user } } = await client.auth.getUser();
+        if (user?.email) {
           await client
             .from('trainer_invites')
             .update({ status: 'accepted' })
-            .eq('email', (await client.auth.getUser()).data.user?.email);
-          
-          document.getElementById('form').style.display = 'none';
-          document.getElementById('status').textContent = '✅ Password set! Open the FITLYTIX app to login with your email and new password.';
+            .eq('email', user.email);
         }
-      });
-  
-      init();
+        show('success-state');
+      }
     });
-  </script>
+
+    init();
+  });
+</script>
+
 </body>
 </html>
