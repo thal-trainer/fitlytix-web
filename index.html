@@ -19,34 +19,45 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const { createClient } = supabase;
-
+    
     const client = createClient(
       'https://fsbnfvjqndcevygqhxkt.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYm5mdmpxbmRjZXZ5Z3FoeGt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU3MjkwODksImV4cCI6MjA2MTMwNTA4OX0.GdDmABkgcSAqBSMDrjSiWbUmlkMJYLOwsHAzFslpv-g',
       { auth: { detectSessionInUrl: true, flowType: 'implicit', persistSession: true } }
     );
-
-    document.getElementById('status').textContent = 'Checking session...';
-
-    client.auth.onAuthStateChange((event, session) => {
-      document.getElementById('status').textContent = 'Event: ' + event;
-      if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
-        if (session) {
+    
+    async function init() {
+      document.getElementById('status').textContent = 'Checking...';
+    
+      const hash = window.location.hash.replace('#', '');
+      const params = new URLSearchParams(hash);
+      const accessToken = params.get('access_token');
+      const refreshToken = params.get('refresh_token');
+    
+      document.getElementById('status').textContent = 'Token found: ' + (accessToken ? 'YES' : 'NO');
+    
+      if (accessToken) {
+        const { data, error } = await client.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken || '',
+        });
+    
+        if (error) {
+          document.getElementById('status').textContent = 'Error: ' + error.message;
+          return;
+        }
+    
+        if (data.session) {
           document.getElementById('status').textContent = 'Ready to set password';
           document.getElementById('form').style.display = 'block';
+          return;
         }
       }
-    });
-
-    async function setPassword() {
-      const pw = document.getElementById('pw').value;
-      const pw2 = document.getElementById('pw2').value;
-      const msg = document.getElementById('msg');
-      if (pw.length < 8) { msg.textContent = 'Password must be at least 8 characters'; return; }
-      if (pw !== pw2) { msg.textContent = 'Passwords do not match'; return; }
-      const { error } = await client.auth.updateUser({ password: pw });
-      msg.textContent = error ? error.message : '✅ Password set! Open the FITLYTIX app to login.';
+    
+      document.getElementById('status').textContent = 'No valid session found. Please use the invite link from your email.';
     }
+    
+    init();
   </script>
 </body>
 </html>
