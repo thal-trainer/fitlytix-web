@@ -406,9 +406,11 @@
     }
   });
   
-  document.getElementById('loading-state').style.display = 'none';
+  
   
   async function init() {
+    document.getElementById('loading-state').style.display = 'none';
+    await new Promise(resolve => setTimeout(resolve, 500));
     const { data: { session }, error } = await supabase.auth.getSession();
   
     if (session) {
