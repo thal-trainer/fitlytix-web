@@ -3,42 +3,49 @@
 <head>
   <meta charset="UTF-8"/>
   <title>FITLYTIX</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body style="background:#000;color:#fff;font-family:sans-serif;padding:40px;">
 
   <h1>FITLYTIX</h1>
-  <div id="status">Loading...</div>
+  <div id="status">Initializing...</div>
   <div id="form" style="display:none;">
     <p>Set your password</p>
-    <input type="password" id="pw" placeholder="New password" style="display:block;margin:10px 0;padding:10px;width:300px;"/>
-    <input type="password" id="pw2" placeholder="Confirm password" style="display:block;margin:10px 0;padding:10px;width:300px;"/>
-    <button onclick="setPassword()" style="padding:10px 20px;background:#C4A8C8;border:none;cursor:pointer;">SET PASSWORD</button>
-    <p id="msg"></p>
+    <input type="password" id="pw" placeholder="New password" style="display:block;margin:10px 0;padding:10px;width:300px;background:#111;color:#fff;border:1px solid #333;"/>
+    <input type="password" id="pw2" placeholder="Confirm password" style="display:block;margin:10px 0;padding:10px;width:300px;background:#111;color:#fff;border:1px solid #333;"/>
+    <button onclick="setPassword()" style="padding:10px 20px;background:#C4A8C8;border:none;cursor:pointer;font-weight:bold;">SET PASSWORD</button>
+    <p id="msg" style="margin-top:10px;"></p>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const supabase = window.supabase.createClient(
+    const { createClient } = supabase;
+
+    const client = createClient(
       'https://fsbnfvjqndcevygqhxkt.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYm5mdmpxbmRjZXZ5Z3FoeGt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU3MjkwODksImV4cCI6MjA2MTMwNTA4OX0.GdDmABkgcSAqBSMDrjSiWbUmlkMJYLOwsHAzFslpv-g',
-      { auth: { detectSessionInUrl: true, flowType: 'implicit' } }
+      { auth: { detectSessionInUrl: true, flowType: 'implicit', persistSession: true } }
     );
 
-    document.getElementById('status').textContent = 'URL: ' + window.location.href;
+    document.getElementById('status').textContent = 'Checking session...';
 
-    supabase.auth.onAuthStateChange((event, session) => {
-      document.getElementById('status').textContent = 'Event: ' + event + ' | Session: ' + (session ? 'YES' : 'NO');
-      if (session) {
-        document.getElementById('form').style.display = 'block';
+    client.auth.onAuthStateChange((event, session) => {
+      document.getElementById('status').textContent = 'Event: ' + event;
+      if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+        if (session) {
+          document.getElementById('status').textContent = 'Ready to set password';
+          document.getElementById('form').style.display = 'block';
+        }
       }
     });
 
     async function setPassword() {
       const pw = document.getElementById('pw').value;
       const pw2 = document.getElementById('pw2').value;
-      if (pw !== pw2) { document.getElementById('msg').textContent = 'Passwords do not match'; return; }
-      const { error } = await supabase.auth.updateUser({ password: pw });
-      document.getElementById('msg').textContent = error ? error.message : 'Password set! Open the FITLYTIX app to login.';
+      const msg = document.getElementById('msg');
+      if (pw.length < 8) { msg.textContent = 'Password must be at least 8 characters'; return; }
+      if (pw !== pw2) { msg.textContent = 'Passwords do not match'; return; }
+      const { error } = await client.auth.updateUser({ password: pw });
+      msg.textContent = error ? error.message : '✅ Password set! Open the FITLYTIX app to login.';
     }
   </script>
 </body>
