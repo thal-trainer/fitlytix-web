@@ -77,6 +77,12 @@
         if (error) {
           msg.textContent = 'Error: ' + error.message;
         } else {
+          // Update trainer_invites status to accepted
+          await client
+            .from('trainer_invites')
+            .update({ status: 'accepted' })
+            .eq('email', (await client.auth.getUser()).data.user?.email);
+          
           document.getElementById('form').style.display = 'none';
           document.getElementById('status').textContent = '✅ Password set! Open the FITLYTIX app to login with your email and new password.';
         }
