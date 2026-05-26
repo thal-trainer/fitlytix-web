@@ -367,8 +367,8 @@
 
     <!-- Invite / Set Password -->
     <div id="invite-state" style="display:none;">
-      <div class="invite-heading">You've been invited</div>
-      <div class="invite-desc">Set your password to start training on FITLYTIX.</div>
+      <div class="invite-heading" id="page-heading">You've been invited</div>
+      <div class="invite-desc" id="page-desc">Set your password to start training on FITLYTIX.</div>
       <div class="gym-badge" id="gym-badge" style="display:none;">
         <div class="gym-dot"></div>
         <span class="gym-name" id="gym-name-text">Your Gym</span>
@@ -489,6 +489,12 @@
           }
         }
         show('invite-state');
+        const type = params.get('type');
+        if (type === 'recovery') {
+          document.getElementById('page-heading').textContent = 'Reset Your Password';
+          document.getElementById('page-desc').textContent = 'Enter your new password below.';
+          document.getElementById('gym-badge').style.display = 'none';
+        }
         return;
       }
     }
