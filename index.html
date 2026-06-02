@@ -870,6 +870,9 @@
     { auth: { detectSessionInUrl: true, flowType: 'implicit', persistSession: true } }
   );
 
+  // Detect client invite from query param set in redirectTo
+  let isClientInvite = new URLSearchParams(window.location.search).get('type') === 'client';
+
   function showOb(id) {
     ['ob-loading','ob-invite','ob-success','ob-default'].forEach(s => {
       document.getElementById(s).style.display = s === id ? 'block' : 'none';
@@ -908,11 +911,28 @@
       });
 
       if (!error && data.session) {
+        const user = data.session.user;
+
         if (type === 'recovery') {
           document.getElementById('ob-heading').textContent = 'Reset Your Password';
           document.getElementById('ob-desc').textContent = 'Enter your new password below.';
+        } else if (isClientInvite) {
+          document.getElementById('ob-heading').textContent = 'Your Fitness Account';
+          document.getElementById('ob-desc').textContent = 'Set your password to view your workouts, sessions and progress on FITLYTIX.';
+          // Still show gym badge for clients
+          if (user?.user_metadata?.gym_id) {
+            const { data: gymData } = await client
+              .from('gyms')
+              .select('name')
+              .eq('id', user.user_metadata.gym_id)
+              .single();
+            if (gymData?.name) {
+              document.getElementById('ob-gym-name').textContent = gymData.name.toUpperCase();
+              document.getElementById('ob-gym-badge').style.display = 'inline-flex';
+            }
+          }
         } else {
-          const user = data.session.user;
+          // Trainer invite
           if (user?.user_metadata?.gym_id) {
             const { data: gymData } = await client
               .from('gyms')
@@ -925,6 +945,7 @@
             }
           }
         }
+
         showOb('ob-invite');
         return;
       }
@@ -934,7 +955,6 @@
   }
 
   document.addEventListener('DOMContentLoaded', function() {
-    // Auto-show overlay if invite/reset link
     const hash = window.location.hash.replace('#', '');
     const params = new URLSearchParams(hash);
     if (params.get('access_token')) showOnboarding();
@@ -974,12 +994,35 @@
         btnText.textContent = 'SET PASSWORD';
       } else {
         const { data: { user } } = await client.auth.getUser();
-        if (user?.email) {
-          await client
-            .from('trainer_invites')
-            .update({ status: 'accepted' })
-            .eq('email', user.email);
+
+        if (isClientInvite) {
+          // Clients - update success steps to reflect their experience
+          document.querySelector('.success-desc').textContent =
+            'Your account is ready. Open the FITLYTIX app and log in to view your fitness data.';
+          document.querySelector('.steps').innerHTML = `
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-text">Open the FITLYTIX app on your phone</div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-text">Log in with your email and the password you just set</div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-text">View your sessions, workouts and progress</div>
+            </div>
+          `;
+        } else {
+          // Trainers - update invite status
+          if (user?.email) {
+            await client
+              .from('trainer_invites')
+              .update({ status: 'accepted' })
+              .eq('email', user.email);
+          }
         }
+
         showOb('ob-success');
       }
     });
