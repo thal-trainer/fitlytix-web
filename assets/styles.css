@@ -1214,8 +1214,8 @@ nav, main, section, footer, .hero { position: relative; z-index: 1; }
 
 .wrap { max-width: var(--wide-w); margin: 0 auto; padding-inline: var(--sp-5); }
 
-.band { padding: 88px 0; }
-.band-tight { padding: 56px 0; }
+.band { padding-block: 88px; }
+.band-tight { padding-block: 56px; }
 .band-line { border-top: 1px solid var(--border); }
 
 .kicker {
@@ -1520,7 +1520,7 @@ nav, main, section, footer, .hero { position: relative; z-index: 1; }
   .hero-sub { margin-inline: auto; }
   .hero .row { justify-content: center; }
   .hero .badge { margin-inline: auto; }
-  .band { padding: 60px 0; }
+  .band { padding-block: 60px; }
   .price-teaser { flex-direction: column; align-items: flex-start; }
 }
 
