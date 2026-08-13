@@ -3,1031 +3,503 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FITLYTIX - Trainer Platform</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>FITLYTIX - One app to run your whole gym</title>
+  <meta name="description" content="Your trainers plan workouts, track progress and book sessions from their phone. You see everything from yours. Fitlytix keeps every client record with the gym." />
+
+  <!--
+    Onboarding moved from this page's modal to /welcome/. Invitation and
+    recovery links already sitting in inboxes still point here with the
+    session in the URL fragment, so forward them before anything else on the
+    page runs. Safe to delete once the oldest outstanding invite has expired.
+  -->
+  <script>
+    (function () {
+      var hash = window.location.hash || '';
+      if (hash.indexOf('access_token=') !== -1 || hash.indexOf('error') !== -1) {
+        window.location.replace('/welcome/' + window.location.search + hash);
+      }
+    })();
+  </script>
+
+  <meta property="og:title" content="FITLYTIX - One app to run your whole gym" />
+  <meta property="og:description" content="Plans, sessions, progress and client records in one place. Built for gyms." />
+  <meta property="og:url" content="https://fitlytix.in/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://fitlytix.in/assets/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="canonical" href="https://fitlytix.in/" />
+
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg: #000000;
-      --card: #141414;
-      --border: #222222;
-      --accent: #C4A8C8;
-      --accent-dim: rgba(196, 168, 200, 0.12);
-      --text: #ffffff;
-      --text-secondary: #aaaaaa;
-      --text-muted: #555555;
-      --success: #27AE60;
-      --danger: #C0392B;
-      --input-bg: #0d0d0d;
-    }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background:
-        radial-gradient(ellipse at 80% 0%, rgba(196,168,200,0.07) 0%, transparent 50%),
-        radial-gradient(ellipse at 0% 100%, rgba(196,168,200,0.04) 0%, transparent 50%);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* NAV */
-    nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 24px;
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .nav-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .nav-logo img {
-      height: 32px;
-      width: auto;
-    }
-
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-    }
-
-    .nav-link {
-      font-size: 12px;
-      color: var(--text-muted);
-      text-decoration: none;
-      letter-spacing: 1px;
-      transition: color 0.2s;
-    }
-
-    .nav-link:hover { color: var(--accent); }
-
-    .nav-cta {
-      background: var(--accent);
-      color: #000;
-      border: none;
-      border-radius: 8px;
-      padding: 8px 16px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 1.5px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: opacity 0.2s;
-    }
-
-    .nav-cta:hover { opacity: 0.85; }
-
-    /* HERO */
-    .hero {
-      position: relative;
-      z-index: 1;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 100px 24px 60px;
-    }
-
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--accent-dim);
-      border: 1px solid rgba(196,168,200,0.3);
-      border-radius: 20px;
-      padding: 6px 14px;
-      margin-bottom: 24px;
-    }
-
-    .hero-badge-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-
-    .hero-badge-text {
-      font-size: 11px;
-      color: var(--accent);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-
-    .hero-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(56px, 12vw, 96px);
-      letter-spacing: 4px;
-      line-height: 0.95;
-      margin-bottom: 20px;
-    }
-
-    .hero-title span { color: var(--accent); }
-
-    .hero-sub {
-      font-size: clamp(14px, 3vw, 18px);
-      color: var(--text-secondary);
-      line-height: 1.6;
-      max-width: 480px;
-      margin-bottom: 40px;
-    }
-
-    .hero-actions {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #000;
-      border: none;
-      border-radius: 10px;
-      padding: 14px 28px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      cursor: pointer;
-      text-decoration: none;
-      transition: opacity 0.2s;
-      display: inline-block;
-    }
-
-    .btn-primary:hover { opacity: 0.85; }
-
-    .btn-secondary {
-      background: transparent;
-      color: var(--text-secondary);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px 28px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      letter-spacing: 1px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: border-color 0.2s, color 0.2s;
-      display: inline-block;
-    }
-
-    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
-
-    .hero-scroll {
-      position: absolute;
-      bottom: 32px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .hero-scroll-text {
-      font-size: 10px;
-      color: var(--text-muted);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-
-    .scroll-line {
-      width: 1px;
-      height: 40px;
-      background: linear-gradient(to bottom, var(--accent), transparent);
-      animation: scrollLine 1.5s ease-in-out infinite;
-    }
-
-    @keyframes scrollLine {
-      0% { transform: scaleY(0); transform-origin: top; }
-      50% { transform: scaleY(1); transform-origin: top; }
-      51% { transform: scaleY(1); transform-origin: bottom; }
-      100% { transform: scaleY(0); transform-origin: bottom; }
-    }
-
-    /* SECTIONS */
-    section {
-      position: relative;
-      z-index: 1;
-      padding: 80px 24px;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .section-label {
-      font-size: 11px;
-      color: var(--accent);
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-
-    .section-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(32px, 6vw, 52px);
-      letter-spacing: 2px;
-      margin-bottom: 16px;
-      line-height: 1;
-    }
-
-    .section-desc {
-      font-size: 15px;
-      color: var(--text-secondary);
-      line-height: 1.7;
-      max-width: 560px;
-      margin-bottom: 48px;
-    }
-
-    /* FEATURES */
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 16px;
-    }
-
-    .feature-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 24px;
-      transition: border-color 0.2s;
-    }
-
-    .feature-card:hover { border-color: rgba(196,168,200,0.3); }
-
-    .feature-icon {
-      width: 40px; height: 40px;
-      border-radius: 10px;
-      background: var(--accent-dim);
-      border: 1px solid rgba(196,168,200,0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 16px;
-      font-size: 18px;
-    }
-
-    .feature-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 20px;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-    }
-
-    .feature-desc {
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.6;
-    }
-
-    /* STATS */
-    .stats-row {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin-bottom: 60px;
-    }
-
-    .stat-card {
-      flex: 1;
-      min-width: 120px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 24px;
-      text-align: center;
-    }
-
-    .stat-value {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 42px;
-      color: var(--accent);
-      letter-spacing: 2px;
-      line-height: 1;
-      margin-bottom: 8px;
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: var(--text-muted);
-      letter-spacing: 1px;
-    }
-
-    /* DIVIDER */
-    .divider {
-      height: 1px;
-      background: var(--border);
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    /* CONTACT */
-    .contact-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 24px;
-    }
-
-    .contact-info { }
-
-    .contact-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 32px;
-      letter-spacing: 1px;
-      margin-bottom: 8px;
-    }
-
-    .contact-email {
-      font-size: 14px;
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    .contact-email:hover { text-decoration: underline; }
-
-    /* FOOTER */
-    footer {
-      position: relative;
-      z-index: 1;
-      border-top: 1px solid var(--border);
-      padding: 24px;
-      text-align: center;
-    }
-
-    .footer-text {
-      font-size: 11px;
-      color: var(--text-muted);
-      letter-spacing: 0.5px;
-    }
-
-    /* ONBOARDING OVERLAY */
-    #onboarding-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 200;
-      background: rgba(0,0,0,0.95);
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-
-    #onboarding-overlay.active { display: flex; }
-
-    .onboarding-card {
-      width: 100%;
-      max-width: 400px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 28px 24px;
-      animation: fadeUp 0.4s ease both;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .onboarding-logo {
-      text-align: center;
-      margin-bottom: 24px;
-    }
-
-    .onboarding-logo img { height: 40px; width: auto; }
-
-    .loading-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 14px;
-      padding: 16px 0;
-    }
-
-    .spinner {
-      width: 28px; height: 28px;
-      border: 2px solid rgba(196,168,200,0.2);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .loading-text {
-      font-size: 12px;
-      color: var(--text-muted);
-      letter-spacing: 1px;
-    }
-
-    .invite-heading {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 28px;
-      letter-spacing: 1px;
-      margin-bottom: 6px;
-    }
-
-    .invite-desc {
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.6;
-      margin-bottom: 20px;
-    }
-
-    .gym-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--accent-dim);
-      border: 1px solid rgba(196,168,200,0.3);
-      border-radius: 6px;
-      padding: 5px 10px;
-      margin-bottom: 20px;
-    }
-
-    .gym-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-
-    .gym-name { font-size: 11px; color: var(--accent); letter-spacing: 1.5px; font-weight: 500; }
-
-    .ob-divider { height: 1px; background: var(--border); margin: 16px 0; }
-
-    .input-group { margin-bottom: 14px; }
-
-    .input-label {
-      display: block;
-      font-size: 10px;
-      color: var(--text-muted);
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-
-    .input-wrap { position: relative; }
-
-    .input-field {
-      width: 100%;
-      background: var(--input-bg);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 13px 44px 13px 14px;
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .input-field:focus { border-color: var(--accent); }
-    .input-field::placeholder { color: var(--text-muted); }
-
-    .toggle-pw {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--text-muted);
-      font-size: 11px;
-      padding: 4px;
-      letter-spacing: 0.5px;
-      font-family: 'DM Sans', sans-serif;
-    }
-
-    .toggle-pw:hover { color: var(--text-secondary); }
-
-    .error-msg {
-      background: rgba(192,57,43,0.1);
-      border: 1px solid rgba(192,57,43,0.4);
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 12px;
-      color: #e74c3c;
-      margin-bottom: 14px;
-      display: none;
-    }
-
-    .ob-btn {
-      width: 100%;
-      background: var(--accent);
-      color: #000;
-      border: none;
-      border-radius: 10px;
-      padding: 14px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      cursor: pointer;
-      margin-top: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: opacity 0.2s;
-    }
-
-    .ob-btn:hover { opacity: 0.9; }
-    .ob-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .btn-spinner {
-      width: 14px; height: 14px;
-      border: 2px solid rgba(0,0,0,0.2);
-      border-top-color: #000;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-      display: none;
-    }
-
-    .success-wrap { text-align: center; padding: 8px 0; display: none; }
-
-    .success-icon {
-      width: 52px; height: 52px;
-      border-radius: 50%;
-      background: rgba(39,174,96,0.1);
-      border: 1px solid rgba(39,174,96,0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 16px;
-    }
-
-    .success-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 26px;
-      letter-spacing: 1px;
-      margin-bottom: 8px;
-    }
-
-    .success-desc {
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.6;
-      margin-bottom: 20px;
-    }
-
-    .steps {
-      text-align: left;
-      background: rgba(196,168,200,0.05);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px;
-    }
-
-    .step {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .step:last-child { margin-bottom: 0; }
-
-    .step-num {
-      width: 20px; height: 20px;
-      border-radius: 50%;
-      background: var(--accent-dim);
-      border: 1px solid rgba(196,168,200,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      color: var(--accent);
-      font-weight: 500;
-      flex-shrink: 0;
-    }
-
-    .step-text {
-      font-size: 12px;
-      color: var(--text-secondary);
-      line-height: 1.5;
-      padding-top: 2px;
-    }
-
-    .close-overlay {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 24px;
-      cursor: pointer;
-      line-height: 1;
-      padding: 4px;
-    }
-
-    .close-overlay:hover { color: var(--text); }
-
-    /* MOBILE */
-    @media (max-width: 600px) {
-      .nav-links { display: none; }
-      .stats-row { gap: 10px; }
-      .contact-row { flex-direction: column; }
-    }
-  </style>
+  <link rel="stylesheet" href="/assets/styles.css" />
 </head>
-<body>
+<body class="has-nav">
 
-<nav>
-  <div class="nav-logo">
-    <img src="logo.png" alt="FITLYTIX" />
+<a class="skip-link" href="#main">Skip to content</a>
+
+<nav class="nav">
+  <a class="nav-logo" href="/"><img src="/assets/logo-mark.png" alt="FITLYTIX" width="50" height="30" /></a>
+  <div class="nav-links" id="nav-links">
+    <a class="nav-link" href="/features/">Features</a>
+    <a class="nav-link" href="/pricing/">Pricing</a>
+    <a class="nav-link" href="/for-gyms/">Who it's for</a>
+    <a class="nav-link" href="/support/">Support</a>
   </div>
-  <div class="nav-links">
-    <a href="#features" class="nav-link">FEATURES</a>
-    <a href="#contact" class="nav-link">CONTACT</a>
+  <div class="nav-actions">
+    <a class="btn btn-primary btn-sm" href="/demo/">Book a demo</a>
   </div>
-  <a href="#" class="nav-cta" onclick="showOnboarding(); return false;">TRAINER LOGIN</a>
+  <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
-<div class="hero">
-  <div class="hero-badge">
-    <div class="hero-badge-dot"></div>
-    <span class="hero-badge-text">Now Live at Thal Fitness Coliseum</span>
-  </div>
-  <h1 class="hero-title">THE TRAINER<br><span>PLATFORM</span></h1>
-  <p class="hero-sub">Manage clients, track progress, plan workouts and schedule sessions - all in one place built for serious trainers.</p>
-  <div class="hero-actions">
-    <a href="#features" class="btn-primary">See Features</a>
-    <a href="mailto:thal4trainer@gmail.com" class="btn-secondary">Contact Us</a>
-  </div>
-  <div class="hero-scroll">
-    <span class="hero-scroll-text">Scroll</span>
-    <div class="scroll-line"></div>
-  </div>
-</div>
+<main id="main">
 
-<div class="divider"></div>
+  <!-- ============ HERO ============ -->
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <h1 class="hero-h">One app to run<br>your <em>whole gym</em></h1>
 
-<section id="features">
-  <div class="section-label">What FITLYTIX does</div>
-  <h2 class="section-title">Everything a trainer needs</h2>
-  <p class="section-desc">Built from the ground up for gym trainers and owners. No bloat, no fluff - just the tools that matter.</p>
+        <p class="hero-sub">
+          Your trainers plan workouts, track progress and book sessions from
+          their phone. You see everything from yours.
+        </p>
 
-  <div class="features-grid">
-    <div class="feature-card">
-      <div class="feature-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="8" r="4" stroke="#C4A8C8" stroke-width="1.8"/>
-          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#C4A8C8" stroke-width="1.8" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div class="feature-title">Client Management</div>
-      <p class="feature-desc">Full client profiles with health metrics, goals, fitness level, injuries and contact details. Everything in one place.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <rect x="2" y="11" width="4" height="2" rx="1" stroke="#C4A8C8" stroke-width="1.8"/>
-          <rect x="18" y="11" width="4" height="2" rx="1" stroke="#C4A8C8" stroke-width="1.8"/>
-          <rect x="6" y="8" width="3" height="8" rx="1.5" stroke="#C4A8C8" stroke-width="1.8"/>
-          <rect x="15" y="8" width="3" height="8" rx="1.5" stroke="#C4A8C8" stroke-width="1.8"/>
-          <rect x="9" y="10" width="6" height="4" rx="1" stroke="#C4A8C8" stroke-width="1.8"/>
-        </svg>
-      </div>
-      <div class="feature-title">Workout Builder</div>
-      <p class="feature-desc">Build multi-day workout programs with exercises from a library of 30+ movements. Assign directly to clients.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <path d="M3 17L8 12L12 16L16 10L21 7" stroke="#C4A8C8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-
-      <div class="feature-title">Progress Tracking</div>
-      <p class="feature-desc">Log body metrics, track BMI, and visualise client progress over time with built-in charts.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z" stroke="#C4A8C8" stroke-width="1.8"/>
-          <circle cx="12" cy="9" r="2" stroke="#C4A8C8" stroke-width="1.8"/>
-        </svg>
-      </div>
-      <div class="feature-title">Nutrition Plans</div>
-      <p class="feature-desc">Build meal plans with macro tracking. Assign active plans to clients and monitor their nutrition goals.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <rect x="3" y="4" width="18" height="18" rx="2" stroke="#C4A8C8" stroke-width="1.8"/>
-          <path d="M3 9H21M8 2v3M16 2v3" stroke="#C4A8C8" stroke-width="1.8" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div class="feature-title">Schedule</div>
-      <p class="feature-desc">Weekly calendar view of all sessions. Mark sessions as completed, missed or cancelled. See today's sessions at a glance.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <path d="M3 9L12 2L21 9V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9z" stroke="#C4A8C8" stroke-width="1.8"/>
-          <path d="M9 21V12H15V21" stroke="#C4A8C8" stroke-width="1.8"/>
-        </svg>
-      </div>
-      <div class="feature-title">Admin Panel</div>
-      <p class="feature-desc">Gym owners get a full admin dashboard. Invite trainers, manage clients across the gym, and track performance.</p>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<section id="contact">
-  <div class="contact-row">
-    <div class="contact-info">
-      <div class="section-label">Get in touch</div>
-      <div class="contact-title">Bring FITLYTIX<br>to your gym</div>
-      <a href="mailto:thal4trainer@gmail.com" class="contact-email">thal4trainer@gmail.com</a>
-    </div>
-    <a href="mailto:thal4trainer@gmail.com" class="btn-primary">Contact Us</a>
-  </div>
-</section>
-
-<footer>
-  <p class="footer-text">© 2026 FITLYTIX. All rights reserved.</p>
-</footer>
-
-<!-- ONBOARDING OVERLAY -->
-<div id="onboarding-overlay">
-  <div style="position: relative;">
-    <button class="close-overlay" onclick="hideOnboarding()">×</button>
-    <div class="onboarding-card">
-      <div class="onboarding-logo">
-        <img src="logo.png" alt="FITLYTIX" />
-      </div>
-
-      <div id="ob-loading" class="loading-wrap">
-        <div class="spinner"></div>
-        <div class="loading-text">VERIFYING</div>
-      </div>
-
-      <div id="ob-invite" style="display:none;">
-        <div class="invite-heading" id="ob-heading">You've been invited</div>
-        <div class="invite-desc" id="ob-desc">Set your password to start training on FITLYTIX.</div>
-        <div class="gym-badge" id="ob-gym-badge" style="display:none;">
-          <div class="gym-dot"></div>
-          <span class="gym-name" id="ob-gym-name">Your Gym</span>
+        <div class="row">
+          <a class="btn btn-primary" href="/demo/">Book a demo</a>
+          <a class="btn btn-secondary" href="/features/">See what you get</a>
         </div>
-        <div class="ob-divider"></div>
-        <div class="error-msg" id="ob-error"></div>
-        <div class="input-group">
-          <label class="input-label">New Password</label>
-          <div class="input-wrap">
-            <input type="password" class="input-field" id="ob-pw" placeholder="Minimum 8 characters" />
-            <button class="toggle-pw" onclick="togglePw('ob-pw', this)" type="button">SHOW</button>
+
+      </div>
+
+      <!-- The product, drawn in CSS. There are no app screenshots yet. -->
+      <div class="device-stage" aria-hidden="true">
+        <div class="mock-card stage-float stage-float-tl">
+          <div class="mock-label">This month</div>
+          <div class="mock-value">94%</div>
+          <div class="mock-delta">Sessions attended</div>
+        </div>
+
+        <div class="device">
+          <div class="device-screen">
+            <div class="app-head">
+              <div class="app-eyebrow">Tuesday, 6 August</div>
+              <div class="app-title">TODAY &middot; 5 SESSIONS</div>
+            </div>
+            <div class="app-row">
+              <span class="app-time">6:00</span>
+              <span class="app-row-body">
+                <span class="app-row-name">Rahul M.</span>
+                <span class="app-row-sub">Push day &middot; Week 4</span>
+              </span>
+              <span class="app-chip app-chip-done">Done</span>
+            </div>
+            <div class="app-row">
+              <span class="app-time">7:00</span>
+              <span class="app-row-body">
+                <span class="app-row-name">Sneha K.</span>
+                <span class="app-row-sub">Full body &middot; Week 2</span>
+              </span>
+              <span class="app-chip app-chip-done">Done</span>
+            </div>
+            <div class="app-row app-row-live">
+              <span class="app-time">9:00</span>
+              <span class="app-row-body">
+                <span class="app-row-name">Arjun P.</span>
+                <span class="app-row-sub">Leg day &middot; Week 7</span>
+              </span>
+              <span class="app-chip app-chip-now">Now</span>
+            </div>
+            <div class="app-row">
+              <span class="app-time">17:00</span>
+              <span class="app-row-body">
+                <span class="app-row-name">Priya S.</span>
+                <span class="app-row-sub">Pull day &middot; Week 1</span>
+              </span>
+              <span class="app-chip app-chip-next">Later</span>
+            </div>
+            <div class="app-row">
+              <span class="app-time">18:30</span>
+              <span class="app-row-body">
+                <span class="app-row-name">Imran H.</span>
+                <span class="app-row-sub">Full body &middot; Week 9</span>
+              </span>
+              <span class="app-chip app-chip-next">Later</span>
+            </div>
+            <div class="app-tabs">
+              <span class="app-tab app-tab-on"></span>
+              <span class="app-tab"></span>
+              <span class="app-tab"></span>
+              <span class="app-tab"></span>
+            </div>
           </div>
         </div>
-        <div class="input-group">
-          <label class="input-label">Confirm Password</label>
-          <div class="input-wrap">
-            <input type="password" class="input-field" id="ob-pw2" placeholder="Re-enter your password" />
-            <button class="toggle-pw" onclick="togglePw('ob-pw2', this)" type="button">SHOW</button>
-          </div>
-        </div>
-        <button class="ob-btn" id="ob-set-btn">
-          <span class="btn-spinner" id="ob-spinner"></span>
-          <span id="ob-btn-text">SET PASSWORD</span>
-        </button>
-      </div>
 
-      <div id="ob-success" class="success-wrap">
-        <div class="success-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12L10 17L20 7" stroke="#27AE60" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <div class="mock-card stage-float stage-float-br">
+          <div class="mock-label">Arjun P.</div>
+          <div class="mock-value">78<span style="font-size:15px;color:var(--text-muted)">kg</span></div>
+          <div class="mock-delta">14 kg down in 6 months</div>
+          <svg class="mock-chart" viewBox="0 0 240 80" fill="none" aria-hidden="true">
+            <defs><linearGradient id="hg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#D4A843" stop-opacity="0.3" />
+              <stop offset="100%" stop-color="#D4A843" stop-opacity="0" />
+            </linearGradient></defs>
+            <path d="M6 12 L45 22 L84 19 L123 38 L162 50 L201 60 L232 66 L232 80 L6 80 Z" fill="url(#hg)" />
+            <path d="M6 12 L45 22 L84 19 L123 38 L162 50 L201 60 L232 66" stroke="#D4A843" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="232" cy="66" r="4" fill="#D4A843" />
           </svg>
         </div>
-        <div class="success-title">Password Set!</div>
-        <div class="success-desc">Your account is ready. Open the FITLYTIX app and log in with your email and new password.</div>
-        <div class="steps">
-          <div class="step">
-            <div class="step-num">1</div>
-            <div class="step-text">Open the FITLYTIX app on your phone</div>
-          </div>
-          <div class="step">
-            <div class="step-num">2</div>
-            <div class="step-text">Enter your email and the password you just set</div>
-          </div>
-          <div class="step">
-            <div class="step-num">3</div>
-            <div class="step-text">Start managing your clients</div>
-          </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TRUST STRIP ============ -->
+  <!-- Placeholder slots. Replace with real gym logos once they are onboarded. -->
+  <div class="band-line">
+    <div class="wrap band-tight center">
+      <div class="kicker">Gyms using Fitlytix</div>
+      <div class="trust">
+        <div class="trust-slot">GYM LOGO</div>
+        <div class="trust-slot">GYM LOGO</div>
+        <div class="trust-slot">GYM LOGO</div>
+        <div class="trust-slot">GYM LOGO</div>
+      </div>
+      <p class="reassure">Placeholder. Real gym logos and a pilot quote go here once gyms are onboarded.</p>
+    </div>
+  </div>
+
+  <!-- ============ PROBLEM ============ -->
+  <div class="band-line">
+    <div class="wrap band">
+      <div class="center band-head">
+        <div class="kicker">The problem</div>
+        <h2 class="sec-h">Sound familiar?</h2>
+      </div>
+
+      <div class="pains">
+        <div class="pain">
+          "Everything my trainer knows is in his notebook."
+          <span>And it leaves when he does.</span>
+        </div>
+        <div class="pain">
+          "A client asked if she improved. I had nothing to show her."
+          <span>So she cancelled.</span>
+        </div>
+        <div class="pain">
+          "Plans are spread across multiple communication channels."
+          <span>Nobody can find anything.</span>
+        </div>
+        <div class="pain">
+          "Half my day goes on registers and follow ups."
+          <span>Time I should spend on the floor.</span>
         </div>
       </div>
 
-      <div id="ob-default" style="display:none; text-align:center; padding: 8px 0;">
-        <div style="font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px; margin-bottom:8px;">Trainer Access</div>
-        <div style="font-size:13px; color:var(--text-secondary); line-height:1.6;">Use the invitation link sent to your email to set your password and access FITLYTIX.</div>
-      </div>
-
+      <p class="fix">
+        Fitlytix puts all of it in one place. Client records, plans, sessions
+        and progress live with your gym, not in someone's phone.
+      </p>
     </div>
   </div>
-</div>
 
-<script>
-  const { createClient } = supabase;
+  <!-- ============ FEATURES ============ -->
+  <div class="band-line">
+    <div class="wrap band">
+      <div class="center band-head">
+        <div class="kicker">What you get</div>
+        <h2 class="sec-h">Built for how gyms actually work</h2>
+      </div>
 
-  const client = createClient(
-    'https://fsbnfvjqndcevygqhxkt.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYm5mdmpxbmRjZXZ5Z3FoeGt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMTM3NTMsImV4cCI6MjA5MjY4OTc1M30.5GkQPCbaaD5SGBDmWjsp1bLQ8gZHnJ0Ez2xJN0neOgg',
-    { auth: { detectSessionInUrl: true, flowType: 'implicit', persistSession: true } }
-  );
+      <div class="feats">
+        <div class="feat">
+          <div class="feat-ico">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="3" y="4.5" width="18" height="17" rx="2" stroke="#D4A843" stroke-width="1.8"/>
+              <path d="M3 9.5H21M8 2.5v3M16 2.5v3" stroke="#D4A843" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Sessions and attendance</h3>
+          <p>Book sessions and mark who turned up. No more paper registers or arguments about session counts.</p>
+        </div>
 
-  // Detect client invite from query param set in redirectTo
-  let isClientInvite = new URLSearchParams(window.location.search).get('type') === 'client';
+        <div class="feat">
+          <div class="feat-ico">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="2" y="11" width="4" height="2" rx="1" stroke="#D4A843" stroke-width="1.8"/>
+              <rect x="18" y="11" width="4" height="2" rx="1" stroke="#D4A843" stroke-width="1.8"/>
+              <rect x="6" y="8" width="3" height="8" rx="1.5" stroke="#D4A843" stroke-width="1.8"/>
+              <rect x="15" y="8" width="3" height="8" rx="1.5" stroke="#D4A843" stroke-width="1.8"/>
+              <rect x="9" y="10" width="6" height="4" rx="1" stroke="#D4A843" stroke-width="1.8"/>
+            </svg>
+          </div>
+          <h3>Workout plans</h3>
+          <p>Build a plan once and give it to as many clients as you want. Injuries show on the profile so nothing gets missed.</p>
+        </div>
 
-  function showOb(id) {
-    ['ob-loading','ob-invite','ob-success','ob-default'].forEach(s => {
-      document.getElementById(s).style.display = s === id ? 'block' : 'none';
-    });
-  }
+        <div class="feat">
+          <div class="feat-ico">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M3 17L8 12L12 16L16 10L21 7" stroke="#D4A843" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3>Progress tracking</h3>
+          <p>Log weight and measurements. Clients see a chart of how far they have come, which is what keeps them paying.</p>
+        </div>
 
-  function showOnboarding() {
-    document.getElementById('onboarding-overlay').classList.add('active');
-    document.body.style.overflow = 'hidden';
-    initOnboarding();
-  }
+        <div class="feat">
+          <div class="feat-ico">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="8" r="4" stroke="#D4A843" stroke-width="1.8"/>
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#D4A843" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Client records</h3>
+          <p>Goals, health details, contact numbers and full history in one profile. Any trainer can pick up where another left off.</p>
+        </div>
 
-  function hideOnboarding() {
-    document.getElementById('onboarding-overlay').classList.remove('active');
-    document.body.style.overflow = '';
-  }
+        <div class="feat">
+          <div class="feat-ico">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 20V11M12 20V4M19 20v-6" stroke="#D4A843" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Reports and leaderboard</h3>
+          <p>See which trainers are busy, who is slipping and which clients are on a streak. A leaderboard keeps members competing.</p>
+        </div>
 
-  function togglePw(inputId, btn) {
-    const input = document.getElementById(inputId);
-    if (input.type === 'password') { input.type = 'text'; btn.textContent = 'HIDE'; }
-    else { input.type = 'password'; btn.textContent = 'SHOW'; }
-  }
+        <div class="feat">
+          <div class="feat-ico">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="6" y="2.5" width="12" height="19" rx="2.5" stroke="#D4A843" stroke-width="1.8"/>
+              <path d="M10.5 18.5h3" stroke="#D4A843" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Works on any phone</h3>
+          <p>Android and iPhone. Nothing to install on a computer, no equipment to buy, no training needed.</p>
+        </div>
+      </div>
 
-  async function initOnboarding() {
-    showOb('ob-loading');
-    const hash = window.location.hash.replace('#', '');
-    const params = new URLSearchParams(hash);
-    const accessToken = params.get('access_token');
-    const refreshToken = params.get('refresh_token');
-    const type = params.get('type');
+      <div class="row row-center" style="margin-top:32px">
+        <a class="btn btn-secondary" href="/features/">See every feature</a>
+      </div>
+    </div>
+  </div>
 
-    if (accessToken) {
-      const { data, error } = await client.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken || '',
-      });
+  <!-- ============ WHO IT IS FOR ============ -->
+  <div class="band-line" id="who">
+    <div class="wrap band">
+      <div class="center band-head">
+        <div class="kicker">Who it's for</div>
+        <h2 class="sec-h">Three people, three views</h2>
+        <p class="lede">Everyone sees what they need and nothing they should not.</p>
+      </div>
 
-      if (!error && data.session) {
-        const user = data.session.user;
+      <div class="who">
+        <div class="who-col">
+          <span class="who-tag">Gym owner</span>
+          <ul>
+            <li>See every trainer and client in one place</li>
+            <li>Add or remove trainer access in seconds</li>
+            <li>Move clients between trainers without losing history</li>
+            <li>Attendance and activity reports</li>
+          </ul>
+        </div>
+        <div class="who-col">
+          <span class="who-tag">Trainer</span>
+          <ul>
+            <li>Today's sessions on the home screen</li>
+            <li>Client history, goals and injuries at hand</li>
+            <li>Reuse plans instead of rewriting them</li>
+            <li>Charts to show clients they are improving</li>
+          </ul>
+        </div>
+        <div class="who-col">
+          <span class="who-tag">Client</span>
+          <ul>
+            <li>Today's workout, exercise by exercise</li>
+            <li>Meal plan and daily targets</li>
+            <li>Upcoming sessions</li>
+            <li>Their own progress over time</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        if (type === 'recovery') {
-          document.getElementById('ob-heading').textContent = 'Reset Your Password';
-          document.getElementById('ob-desc').textContent = 'Enter your new password below.';
-        } else if (isClientInvite) {
-          document.getElementById('ob-heading').textContent = 'Your Fitness Account';
-          document.getElementById('ob-desc').textContent = 'Set your password to view your workouts, sessions and progress on FITLYTIX.';
-          // Still show gym badge for clients
-          if (user?.user_metadata?.gym_id) {
-            const { data: gymData } = await client
-              .from('gyms')
-              .select('name')
-              .eq('id', user.user_metadata.gym_id)
-              .single();
-            if (gymData?.name) {
-              document.getElementById('ob-gym-name').textContent = gymData.name.toUpperCase();
-              document.getElementById('ob-gym-badge').style.display = 'inline-flex';
-            }
-          }
-        } else {
-          // Trainer invite
-          if (user?.user_metadata?.gym_id) {
-            const { data: gymData } = await client
-              .from('gyms')
-              .select('name')
-              .eq('id', user.user_metadata.gym_id)
-              .single();
-            if (gymData?.name) {
-              document.getElementById('ob-gym-name').textContent = gymData.name.toUpperCase();
-              document.getElementById('ob-gym-badge').style.display = 'inline-flex';
-            }
-          }
-        }
+  <!-- ============ RESULTS ============ -->
+  <!-- Placeholder. Replace with a real case study once there are numbers. -->
+  <div class="band-line">
+    <div class="wrap band">
+      <div class="center band-head">
+        <div class="kicker">Results</div>
+        <h2 class="sec-h">Proof from real gyms</h2>
+      </div>
+      <div class="result-ph">
+        <p>
+          Placeholder. Once Thal Fitness has been running a few months, this
+          becomes a short case study with real numbers, for example retention
+          up, admin hours down, sessions logged, plus a quote with a name and
+          photo.
+        </p>
+      </div>
+    </div>
+  </div>
 
-        showOb('ob-invite');
-        return;
-      }
-    }
+  <!-- ============ PRICING TEASER ============ -->
+  <div class="band-line">
+    <div class="wrap band">
+      <div class="price-teaser">
+        <div>
+          <div class="kicker">Pricing</div>
+          <h2 class="sec-h" style="font-size:34px;margin-bottom:10px">Priced per gym, not per client</h2>
+          <p class="lede" style="font-size:15px;margin:0">
+            Sign up fifty new members this month and your bill stays the same.
+            No setup fee.
+          </p>
+        </div>
+        <a class="btn btn-primary" href="/pricing/">See pricing</a>
+      </div>
+    </div>
+  </div>
 
-    showOb('ob-default');
-  }
+  <!-- ============ FAQ ============ -->
+  <div class="band-line">
+    <div class="wrap band">
+      <div class="center band-head">
+        <div class="kicker">Questions</div>
+        <h2 class="sec-h">Before you book</h2>
+      </div>
 
-  document.addEventListener('DOMContentLoaded', function() {
-    const hash = window.location.hash.replace('#', '');
-    const params = new URLSearchParams(hash);
-    if (params.get('access_token')) showOnboarding();
+      <details class="faq">
+        <summary>Does it work on any phone?</summary>
+        <div class="faq-body">Yes. Fitlytix runs on Android and iPhone. Your trainers do not need a computer and there is no equipment to buy.</div>
+      </details>
+      <details class="faq">
+        <summary>Are my trainers technical enough for this?</summary>
+        <div class="faq-body">If they can use WhatsApp, they can use Fitlytix. Most trainers are comfortable after one short session, and we run that session for you.</div>
+      </details>
+      <details class="faq">
+        <summary>Do we have to sign a long contract?</summary>
+        <div class="faq-body">No. You pay monthly and can stop at the end of any billing period. Annual billing is available if you prefer it.</div>
+      </details>
+      <details class="faq">
+        <summary>What if we need help?</summary>
+        <div class="faq-body">Email us or message us on WhatsApp. We reply within two working days.</div>
+      </details>
+      <details class="faq">
+        <summary>What happens to our data if we leave?</summary>
+        <div class="faq-body">It is yours. Ask for an export at any time and we will send you everything. We do not hold gym records hostage.</div>
+      </details>
+      <details class="faq">
+        <summary>How long does setup take?</summary>
+        <div class="faq-body">Most gyms are running in two days. We set your trainers up on day one, and you add your clients on day two.</div>
+      </details>
+    </div>
+  </div>
 
-    document.getElementById('ob-set-btn').addEventListener('click', async function() {
-      const pw = document.getElementById('ob-pw').value;
-      const pw2 = document.getElementById('ob-pw2').value;
-      const errorEl = document.getElementById('ob-error');
-      const spinner = document.getElementById('ob-spinner');
-      const btnText = document.getElementById('ob-btn-text');
-      const btn = document.getElementById('ob-set-btn');
+  <!-- ============ DATA AND SECURITY ============ -->
+  <div class="band-line">
+    <div class="wrap band">
+      <div class="center band-head">
+        <div class="kicker">Your data</div>
+        <h2 class="sec-h">Records stay with the gym</h2>
+      </div>
 
-      errorEl.style.display = 'none';
+      <div class="sec">
+        <div class="sec-item">
+          <span class="sec-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="4" y="10" width="16" height="11" rx="2" stroke="#D4A843" stroke-width="1.8"/>
+            <path d="M8 10V7a4 4 0 018 0v3" stroke="#D4A843" stroke-width="1.8"/>
+          </svg></span>
+          <h3>You own it</h3>
+          <p>Client records belong to your gym, not to a trainer and not to us.</p>
+        </div>
+        <div class="sec-item">
+          <span class="sec-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 3l8 3.5v5c0 4.6-3.3 8.6-8 9.5-4.7-.9-8-4.9-8-9.5v-5L12 3z" stroke="#D4A843" stroke-width="1.8" stroke-linejoin="round"/>
+          </svg></span>
+          <h3>Kept private</h3>
+          <p>No other gym can see your clients. We never sell data or use it for ads.</p>
+        </div>
+        <div class="sec-item">
+          <span class="sec-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13" stroke="#D4A843" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg></span>
+          <h3>Leave any time</h3>
+          <p>Export everything on request. Anyone can delete their account from the app or the website.</p>
+        </div>
+      </div>
 
-      if (pw.length < 8) {
-        errorEl.textContent = 'Password must be at least 8 characters.';
-        errorEl.style.display = 'block';
-        return;
-      }
-      if (pw !== pw2) {
-        errorEl.textContent = 'Passwords do not match.';
-        errorEl.style.display = 'block';
-        return;
-      }
+      <div class="row" style="margin-top:26px">
+        <a class="btn btn-secondary" href="/privacy/">Privacy policy</a>
+        <a class="btn btn-secondary" href="/delete-account/">Delete your account</a>
+      </div>
+    </div>
+  </div>
 
-      btn.disabled = true;
-      spinner.style.display = 'block';
-      btnText.textContent = 'SETTING PASSWORD...';
+  <!-- ============ FINAL CTA ============ -->
+  <div class="wrap band">
+    <div class="final">
+      <h2>SEE THE WHOLE<br>THING WORKING</h2>
+      <p class="lede center" style="margin-inline:auto">
+        A walkthrough on a demo gym we have already set up, with realistic data
+        in every screen.
+      </p>
+      <div class="row row-center" style="margin-top:26px">
+        <a class="btn btn-primary" href="/demo/">Book a demo</a>
+        <a class="btn btn-secondary" href="/pricing/">See pricing</a>
+      </div>
+      <div class="risk">
+        <span>No setup fee</span>
+        <span>No card needed</span>
+      </div>
+    </div>
+  </div>
 
-      const { error } = await client.auth.updateUser({ password: pw });
+</main>
 
-      if (error) {
-        errorEl.textContent = error.message;
-        errorEl.style.display = 'block';
-        btn.disabled = false;
-        spinner.style.display = 'none';
-        btnText.textContent = 'SET PASSWORD';
-      } else {
-        const { data: { user } } = await client.auth.getUser();
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo.png" alt="FITLYTIX" width="53" height="40" />
+      <p class="footer-tagline">One app to run your whole gym.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Product</div>
+      <ul class="footer-links">
+        <li><a href="/features/">Features</a></li>
+        <li><a href="/pricing/">Pricing</a></li>
+        <li><a href="/for-gyms/">Who it's for</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Company</div>
+      <ul class="footer-links">
+        <li><a href="/demo/">Book a demo</a></li>
+        <li><a href="/support/">Support</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Legal</div>
+      <ul class="footer-links">
+        <li><a href="/privacy/">Privacy policy</a></li>
+        <li><a href="/terms/">Terms of service</a></li>
+        <li><a href="/delete-account/">Delete account</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-text">&copy; <span data-year></span> FITLYTIX. All rights reserved.</p>
+    <p class="footer-text">Made for gyms in India.</p>
+  </div>
+</footer>
 
-        if (isClientInvite) {
-          // Clients - update success steps to reflect their experience
-          document.querySelector('.success-desc').textContent =
-            'Your account is ready. Open the FITLYTIX app and log in to view your fitness data.';
-          document.querySelector('.steps').innerHTML = `
-            <div class="step">
-              <div class="step-num">1</div>
-              <div class="step-text">Open the FITLYTIX app on your phone</div>
-            </div>
-            <div class="step">
-              <div class="step-num">2</div>
-              <div class="step-text">Log in with your email and the password you just set</div>
-            </div>
-            <div class="step">
-              <div class="step-num">3</div>
-              <div class="step-text">View your sessions, workouts and progress</div>
-            </div>
-          `;
-        } else {
-          // Trainers - update invite status
-          if (user?.email) {
-            await client
-              .from('trainer_invites')
-              .update({ status: 'accepted' })
-              .eq('email', user.email);
-          }
-        }
-
-        showOb('ob-success');
-      }
-    });
-  });
-</script>
+<script src="/assets/site.js"></script>
 
 </body>
 </html>

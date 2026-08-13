@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reset Your Password - FITLYTIX</title>
+  <meta name="description" content="Request a password reset link for your FITLYTIX account." />
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+
+<main class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <a href="/"><img src="/assets/logo.png" alt="FITLYTIX" width="53" height="40" /></a>
+    </div>
+
+    <!-- Request form -->
+    <div id="state-form">
+      <h1 class="auth-title">Reset Password</h1>
+      <p class="auth-desc">
+        Enter the email address on your FITLYTIX account and we'll send you a link to set a new password.
+      </p>
+
+      <div class="alert alert-error" id="form-error" role="alert" hidden></div>
+
+      <form id="reset-form" novalidate>
+        <div class="field">
+          <label class="field-label" for="email">Email Address</label>
+          <input class="input" type="email" id="email" name="email"
+                 autocomplete="username" inputmode="email" placeholder="you@example.com" required />
+        </div>
+
+        <button class="btn btn-primary btn-block mt-4" type="submit" id="submit-btn">
+          <span class="btn-spinner"></span>
+          <span id="submit-text">SEND RESET LINK</span>
+        </button>
+      </form>
+
+      <p class="auth-footer">
+        Remembered it? <a href="/">Back to fitlytix.in</a>
+      </p>
+    </div>
+
+    <!--
+      Shown for every submitted address, whether or not an account exists.
+      Confirming which emails are registered would let anyone enumerate the
+      gym's trainers and clients.
+    -->
+    <div id="state-sent" class="auth-result" hidden>
+      <div class="result-icon result-icon-success">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="2.5" y="5" width="19" height="14" rx="2" stroke="#27AE60" stroke-width="1.8"/>
+          <path d="M3 6.5L12 13L21 6.5" stroke="#27AE60" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h1 class="auth-title">Check Your Email</h1>
+      <p class="auth-desc">
+        If an account exists for <strong id="sent-email" class="text-accent"></strong>,
+        a password reset link is on its way. The link is valid for one hour.
+      </p>
+      <ol class="steps">
+        <li>Open the email from FITLYTIX</li>
+        <li>Tap the reset link and choose a new password</li>
+        <li>Log back in to the app</li>
+      </ol>
+      <p class="auth-footer">
+        Nothing after a few minutes? Check your spam folder, or
+        <a href="/support/">contact support</a>.
+      </p>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/assets/config.js"></script>
+<script src="/assets/auth.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var form = document.getElementById('reset-form');
+  var button = document.getElementById('submit-btn');
+  var label = document.getElementById('submit-text');
+  var errorBox = document.getElementById('form-error');
+
+  form.addEventListener('submit', async function (event) {
+    event.preventDefault();
+
+    var email = document.getElementById('email').value.trim();
+    errorBox.hidden = true;
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errorBox.textContent = 'Enter a valid email address.';
+      errorBox.hidden = false;
+      return;
+    }
+
+    button.disabled = true;
+    button.classList.add('is-loading');
+    label.textContent = 'SENDING...';
+
+    var response = await FitlytixAuth.client.auth.resetPasswordForEmail(email, {
+      redirectTo: window.FITLYTIX.site.origin + '/welcome/',
+    });
+
+    // Rate limiting is the one failure worth surfacing. Every other error is
+    // swallowed so the response cannot be used to test whether an email exists.
+    if (response.error && /rate limit|too many/i.test(response.error.message)) {
+      errorBox.textContent = FitlytixAuth.friendlyError(response.error.message);
+      errorBox.hidden = false;
+      button.disabled = false;
+      button.classList.remove('is-loading');
+      label.textContent = 'SEND RESET LINK';
+      return;
+    }
+
+    document.getElementById('sent-email').textContent = email;
+    document.getElementById('state-form').hidden = true;
+    document.getElementById('state-sent').hidden = false;
+  });
+})();
+</script>
+
+</body>
+</html>

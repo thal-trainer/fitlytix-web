@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pricing - FITLYTIX</title>
+  <meta name="description" content="Priced per gym, not per client. Add as many members as you want and your bill stays the same. No setup fee." />
+
+  <meta property="og:title" content="Pricing - FITLYTIX" />
+  <meta property="og:description" content="Priced per gym, not per client. No setup fee." />
+  <meta property="og:url" content="https://fitlytix.in/pricing/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://fitlytix.in/assets/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="canonical" href="https://fitlytix.in/pricing/" />
+
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/styles.css" />
+
+  <style>
+    .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: stretch; }
+
+    .plan {
+      display: flex; flex-direction: column;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 28px;
+    }
+    .plan-featured { border-color: var(--border-bright); position: relative; }
+    .plan-flag {
+      position: absolute; top: -11px; left: 28px;
+      background: var(--accent); color: #000;
+      font-size: 9px; font-weight: 500; letter-spacing: 1.5px;
+      text-transform: uppercase; padding: 4px 10px; border-radius: 999px;
+    }
+    .plan-name { font-family: var(--font-display); font-size: 26px; letter-spacing: 1px; margin-bottom: 8px; }
+    .plan-for { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 22px; min-height: 40px; }
+    .plan-price { font-family: var(--font-display); font-size: 40px; color: var(--accent); letter-spacing: 1px; line-height: 1; }
+    .plan-period { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+    .plan-feats { list-style: none; margin: 24px 0; flex: 1; }
+    .plan-feats li {
+      font-size: 14px; color: var(--text-secondary); line-height: 1.55;
+      padding-left: 22px; position: relative; margin-bottom: 11px;
+    }
+    .plan-feats li::before {
+      content: ''; position: absolute; left: 0; top: 9px;
+      width: 9px; height: 2px; background: var(--accent);
+    }
+    @media (max-width: 900px) { .plans { grid-template-columns: 1fr; } .plan-for { min-height: 0; } }
+  </style>
+</head>
+<body class="has-nav">
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<nav class="nav">
+  <a class="nav-logo" href="/"><img src="/assets/logo-mark.png" alt="FITLYTIX" width="50" height="30" /></a>
+  <div class="nav-links" id="nav-links">
+    <a class="nav-link" href="/features/">Features</a>
+    <a class="nav-link" href="/pricing/">Pricing</a>
+    <a class="nav-link" href="/for-gyms/">Who it's for</a>
+    <a class="nav-link" href="/support/">Support</a>
+  </div>
+  <div class="nav-actions">
+    <a class="btn btn-primary btn-sm" href="/demo/">Book a demo</a>
+  </div>
+  <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<main id="main">
+
+  <div class="wrap">
+    <div class="hero hero-solo">
+      <div>
+        <div class="kicker">Pricing</div>
+        <h1 class="hero-h">Priced per gym,<br>not per <em>client</em></h1>
+        <p class="hero-sub">
+          Sign up fifty new members this month and your bill stays exactly the
+          same. You pay for the gym, so growing never costs you more.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PLANS ============ -->
+  <div class="wrap" style="padding-bottom:20px">
+    <div class="plans">
+
+      <div class="plan">
+        <div class="plan-name">Studio</div>
+        <p class="plan-for">One or two trainers. Good for a small studio or a trainer going solo.</p>
+        <div class="plan-price" data-price="studio">&nbsp;</div>
+        <p class="plan-period" data-period="studio"></p>
+        <ul class="plan-feats">
+          <li>Up to 2 trainer accounts</li>
+          <li>Unlimited clients</li>
+          <li>Sessions and attendance</li>
+          <li>Workout and meal plans</li>
+          <li>Progress tracking</li>
+          <li>Email support</li>
+        </ul>
+        <a class="btn btn-secondary btn-block" href="/demo/">Book a demo</a>
+      </div>
+
+      <div class="plan plan-featured">
+        <span class="plan-flag">Most gyms</span>
+        <div class="plan-name">Gym</div>
+        <p class="plan-for">A floor team and an owner who wants to see what is going on.</p>
+        <div class="plan-price" data-price="gym">&nbsp;</div>
+        <p class="plan-period" data-period="gym"></p>
+        <ul class="plan-feats">
+          <li>Up to 10 trainer accounts</li>
+          <li>Unlimited clients</li>
+          <li>Everything in Studio</li>
+          <li>Owner dashboard</li>
+          <li>Trainer access control</li>
+          <li>Move clients between trainers</li>
+          <li>Reports and leaderboard</li>
+          <li>We set you up and train your team</li>
+          <li>WhatsApp support</li>
+        </ul>
+        <a class="btn btn-primary btn-block" href="/demo/">Book a demo</a>
+      </div>
+
+      <div class="plan">
+        <div class="plan-name">Multi site</div>
+        <p class="plan-for">More than one branch under the same name.</p>
+        <div class="plan-price" data-price="multi">&nbsp;</div>
+        <p class="plan-period" data-period="multi"></p>
+        <ul class="plan-feats">
+          <li>Unlimited trainer accounts</li>
+          <li>More than one location</li>
+          <li>Everything in Gym</li>
+          <li>Reports across all branches</li>
+          <li>Setup at each location</li>
+          <li>One person you can call</li>
+        </ul>
+        <a class="btn btn-secondary btn-block" href="/demo/?trainers=multi">Talk to us</a>
+      </div>
+
+    </div>
+
+    <p class="reassure center" style="margin-top:24px">
+      Prices are before GST. Pay monthly or yearly.
+      <a href="/demo/">Ask about the launch rate</a> if you are one of our first gyms.
+    </p>
+  </div>
+
+  <!-- ============ INCLUDED ============ -->
+  <div class="band-line">
+    <div class="wrap band">
+      <div class="center band-head">
+        <div class="kicker">On every plan</div>
+        <h2 class="sec-h">No surprises later</h2>
+      </div>
+
+      <div class="feats">
+        <div class="feat">
+          <h3>No setup fee</h3>
+          <p>We build your gym and train your team without charging for it.</p>
+        </div>
+        <div class="feat">
+          <h3>No charge per client</h3>
+          <p>Add fifty members this month. Your bill does not move.</p>
+        </div>
+        <div class="feat">
+          <h3>Client app included</h3>
+          <p>Your members get their own app with plans and progress. Not an add on.</p>
+        </div>
+        <div class="feat">
+          <h3>Both phones</h3>
+          <p>Android and iPhone. No computer needed anywhere in the gym.</p>
+        </div>
+        <div class="feat">
+          <h3>Export any time</h3>
+          <p>Ask and we send you everything. Including if you decide to leave.</p>
+        </div>
+        <div class="feat">
+          <h3>No long contract</h3>
+          <p>Pay monthly. Stop at the end of any billing period.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ FAQ ============ -->
+  <div class="band-line">
+    <div class="wrap band">
+      <div class="center band-head">
+        <div class="kicker">Questions</div>
+        <h2 class="sec-h">About pricing</h2>
+      </div>
+
+      <details class="faq">
+        <summary>Can we try it first?</summary>
+        <div class="faq-body">Yes. We walk you through a demo gym we have already set up, so you can see every screen working with realistic data before deciding anything. If you want to go ahead, we then create your own gym. <a href="/demo/">Book a demo</a> to set that up.</div>
+      </details>
+      <details class="faq">
+        <summary>What counts as a trainer account?</summary>
+        <div class="faq-body">Anyone who logs in to manage clients, so trainers and gym admins. Client accounts are unlimited on every plan and are never counted.</div>
+      </details>
+      <details class="faq">
+        <summary>What if we grow past our plan?</summary>
+        <div class="faq-body">Move up whenever you need to. We charge you the difference for the rest of the period and nothing about your data changes.</div>
+      </details>
+      <details class="faq">
+        <summary>Can we cancel?</summary>
+        <div class="faq-body">Yes, at the end of any billing period. Ask for your export first. See the <a href="/terms/">terms</a>.</div>
+      </details>
+      <details class="faq">
+        <summary>How do we pay?</summary>
+        <div class="faq-body">We are still finalising payment options. Ask us on your demo call and we will tell you exactly where this stands.</div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ============ FINAL CTA ============ -->
+  <div class="wrap band">
+    <div class="final">
+      <h2>NOT SURE WHICH<br>PLAN FITS?</h2>
+      <p class="lede center" style="margin-inline:auto">
+        Tell us how many trainers you have and we will point you at the right
+        one. No pressure either way.
+      </p>
+      <div class="row row-center" style="margin-top:26px">
+        <a class="btn btn-primary" href="/demo/">Book a demo</a>
+        <a class="btn btn-secondary" href="/features/">See features</a>
+      </div>
+      <div class="risk">
+        <span>No setup fee</span>
+        <span>No card needed</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo.png" alt="FITLYTIX" width="53" height="40" />
+      <p class="footer-tagline">One app to run your whole gym.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Product</div>
+      <ul class="footer-links">
+        <li><a href="/features/">Features</a></li>
+        <li><a href="/pricing/">Pricing</a></li>
+        <li><a href="/for-gyms/">Who it's for</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Company</div>
+      <ul class="footer-links">
+        <li><a href="/demo/">Book a demo</a></li>
+        <li><a href="/support/">Support</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Legal</div>
+      <ul class="footer-links">
+        <li><a href="/privacy/">Privacy policy</a></li>
+        <li><a href="/terms/">Terms of service</a></li>
+        <li><a href="/delete-account/">Delete account</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-text">&copy; <span data-year></span> FITLYTIX. All rights reserved.</p>
+    <p class="footer-text">Made for gyms in India.</p>
+  </div>
+</footer>
+
+<script src="/assets/site.js"></script>
+<script>
+/* ============================================================================
+   SET YOUR PRICES HERE.
+
+   Give a tier an `amount` (a number) to show a figure. Leave it null and the
+   tier reads "Talk to us" instead, which is a fine state to ship in while the
+   numbers are still being decided. That is how the page renders today.
+
+     studio: { amount: 1499, period: 'per month' }
+   ============================================================================ */
+
+var PRICING = {
+  currency: '₹',
+  tiers: {
+    studio: { amount: null, period: 'per month' },
+    gym:    { amount: null, period: 'per month' },
+    multi:  { amount: null, period: 'per location, per month' },
+  },
+};
+
+(function () {
+  Object.keys(PRICING.tiers).forEach(function (key) {
+    var tier = PRICING.tiers[key];
+    var priceEl = document.querySelector('[data-price="' + key + '"]');
+    var periodEl = document.querySelector('[data-period="' + key + '"]');
+    if (!priceEl) return;
+
+    if (typeof tier.amount === 'number') {
+      priceEl.textContent = PRICING.currency + tier.amount.toLocaleString('en-IN');
+      periodEl.textContent = tier.period;
+    } else {
+      priceEl.textContent = 'Talk to us';
+      priceEl.style.fontSize = '28px';
+      periodEl.textContent = 'Priced to your gym';
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

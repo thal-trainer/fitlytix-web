@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book a demo - FITLYTIX</title>
+  <meta name="description" content="A walkthrough of Fitlytix on a call. We show you a demo gym we have set up, so you can see every screen working before you decide." />
+
+  <meta property="og:title" content="Book a demo - FITLYTIX" />
+  <meta property="og:description" content="See every screen working on a demo gym we have set up." />
+  <meta property="og:url" content="https://fitlytix.in/demo/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://fitlytix.in/assets/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="canonical" href="https://fitlytix.in/demo/" />
+
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/styles.css" />
+
+  <style>
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 1fr minmax(320px, 460px);
+      gap: 56px;
+      align-items: start;
+      padding: 64px 0 88px;
+    }
+    @media (max-width: 900px) { .demo-grid { grid-template-columns: 1fr; gap: 36px; padding: 44px 0 56px; } }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 520px) { .field-row { grid-template-columns: 1fr; } }
+
+    /* Flags a field the page pre-filled, so the visitor notices we set it */
+    .select.is-prefilled { border-color: var(--accent); background-color: rgba(212,168,67,0.08); }
+  </style>
+</head>
+<body class="has-nav">
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<nav class="nav">
+  <a class="nav-logo" href="/"><img src="/assets/logo-mark.png" alt="FITLYTIX" width="50" height="30" /></a>
+  <div class="nav-links" id="nav-links">
+    <a class="nav-link" href="/features/">Features</a>
+    <a class="nav-link" href="/pricing/">Pricing</a>
+    <a class="nav-link" href="/for-gyms/">Who it's for</a>
+    <a class="nav-link" href="/support/">Support</a>
+  </div>
+  <div class="nav-actions">
+    <a class="btn btn-primary btn-sm" href="/demo/">Book a demo</a>
+  </div>
+  <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<main id="main">
+  <div class="wrap">
+    <div class="demo-grid">
+
+      <div>
+        <div class="kicker">Book a demo</div>
+        <h1 class="hero-h" style="margin-top:0">See the whole<br>thing <em>working</em></h1>
+        <p class="hero-sub" style="margin-bottom:22px">
+          A walkthrough on a call. We show you a demo gym we have already set
+          up, with realistic trainers, clients and sessions already in it.
+        </p>
+
+        <ul class="who-col" style="background:none;border:none;padding:0;list-style:none">
+          <li>The trainer view, building a plan and running a session</li>
+          <li>The client view, what your members actually see</li>
+          <li>The owner view, everything across the floor</li>
+          <li>How your own gym gets set up</li>
+          <li>Straight answers on pricing for a gym your size</li>
+        </ul>
+
+        <div class="alert alert-info" style="margin-top:26px">
+          No slides and no sales script. If Fitlytix is not right for your gym
+          we will say so on the call.
+        </div>
+      </div>
+
+      <div class="card">
+        <div id="form-state">
+          <h2 style="font-family:var(--font-display);font-size:26px;letter-spacing:1px;font-weight:400;margin-bottom:6px">
+            TELL US ABOUT YOUR GYM
+          </h2>
+          <p class="card-desc mb-5">We reply within two working days.</p>
+
+          <div class="alert alert-error" id="form-error" role="alert" hidden></div>
+
+          <form id="demo-form" novalidate>
+            <div class="field">
+              <label class="field-label" for="gym">Gym name *</label>
+              <input class="input" type="text" id="gym" autocomplete="organization" required />
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label" for="name">Your name *</label>
+                <input class="input" type="text" id="name" autocomplete="name" required />
+              </div>
+              <div class="field">
+                <label class="field-label" for="city">City</label>
+                <input class="input" type="text" id="city" autocomplete="address-level2" />
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="email">Email *</label>
+              <input class="input" type="email" id="email" inputmode="email" autocomplete="email" required />
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="phone">Phone or WhatsApp</label>
+              <input class="input" type="tel" id="phone" inputmode="tel" autocomplete="tel" />
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="trainers">How many trainers?</label>
+              <select class="select" id="trainers">
+                <option value="Just me">Just me</option>
+                <option value="2 to 5">2 to 5</option>
+                <option value="6 to 10">6 to 10</option>
+                <option value="More than 10">More than 10</option>
+                <option value="More than one location">More than one location</option>
+              </select>
+              <p class="field-hint" id="trainers-hint" hidden>We have set this from the plan you came in on.</p>
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="message">Anything we should know?</label>
+              <textarea class="textarea" id="message" placeholder="What you use today, what is not working, anything you want to see"></textarea>
+            </div>
+
+            <div class="field">
+              <label class="checkbox-row">
+                <input type="checkbox" id="consent" required />
+                <span>
+                  I am happy for Fitlytix to contact me about this enquiry, as
+                  set out in the <a href="/privacy/">privacy policy</a>.
+                </span>
+              </label>
+            </div>
+
+            <button class="btn btn-primary btn-block" type="submit" id="submit-btn">
+              <span class="btn-spinner"></span>
+              <span id="submit-text">Request a demo</span>
+            </button>
+          </form>
+        </div>
+
+        <div id="sent-state" class="auth-result" hidden>
+          <div class="result-icon result-icon-success">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 12L10 17L20 7" stroke="#27AE60" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h2 class="auth-title">Request received</h2>
+          <p class="auth-desc">
+            Thanks. We have your details and will be in touch within two working
+            days to set up a time.
+          </p>
+          <a class="btn btn-secondary btn-block" href="/features/">Look around while you wait</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo.png" alt="FITLYTIX" width="53" height="40" />
+      <p class="footer-tagline">One app to run your whole gym.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Product</div>
+      <ul class="footer-links">
+        <li><a href="/features/">Features</a></li>
+        <li><a href="/pricing/">Pricing</a></li>
+        <li><a href="/for-gyms/">Who it's for</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Company</div>
+      <ul class="footer-links">
+        <li><a href="/demo/">Book a demo</a></li>
+        <li><a href="/support/">Support</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Legal</div>
+      <ul class="footer-links">
+        <li><a href="/privacy/">Privacy policy</a></li>
+        <li><a href="/terms/">Terms of service</a></li>
+        <li><a href="/delete-account/">Delete account</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-text">&copy; <span data-year></span> FITLYTIX. All rights reserved.</p>
+    <p class="footer-text">Made for gyms in India.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/assets/config.js"></script>
+<script src="/assets/auth.js"></script>
+<script src="/assets/site.js"></script>
+<script>
+/* ============================================================================
+   SETUP REQUIRED. This form writes straight into Supabase and never opens a
+   mail client. Until the table below exists the form shows an error and points
+   people at support@fitlytix.in, so create it before going live.
+
+   Run this in the Supabase SQL editor:
+
+     create table public.demo_requests (
+       id          uuid primary key default gen_random_uuid(),
+       created_at  timestamptz not null default now(),
+       gym         text not null,
+       name        text not null,
+       email       text not null,
+       phone       text,
+       city        text,
+       trainers    text,
+       message     text
+     );
+
+     alter table public.demo_requests enable row level security;
+
+     -- Anyone may submit. Nobody may read it back from the browser.
+     create policy "anon can submit demo requests"
+       on public.demo_requests for insert to anon with check (true);
+
+   Emailing support@fitlytix.in on each request is handled by the edge function
+   `notify-demo-request`, which lives in the Thal app repo alongside the other
+   functions, not here:
+
+     Thal/supabase/functions/notify-demo-request/index.ts
+
+   It is wired up by a Database Webhook on Insert into demo_requests. Without
+   that webhook the requests still arrive safely, you just read them in the
+   Supabase table editor instead of your inbox.
+   ============================================================================ */
+
+(function () {
+  'use strict';
+
+  var form = document.getElementById('demo-form');
+  var button = document.getElementById('submit-btn');
+  var label = document.getElementById('submit-text');
+  var errorBox = document.getElementById('form-error');
+  var trainersEl = document.getElementById('trainers');
+
+  // Pricing sends visitors here with ?trainers=multi from the Multi site plan
+  var PRESETS = {
+    multi: 'More than one location',
+    solo: 'Just me',
+    small: '2 to 5',
+    gym: '6 to 10',
+  };
+  var wanted = new URLSearchParams(window.location.search).get('trainers');
+  if (wanted && PRESETS[wanted]) {
+    trainersEl.value = PRESETS[wanted];
+    trainersEl.classList.add('is-prefilled');
+    document.getElementById('trainers-hint').hidden = false;
+  }
+
+  function fail(message, focusId) {
+    errorBox.innerHTML = message;
+    errorBox.hidden = false;
+    if (focusId) document.getElementById(focusId).focus();
+  }
+
+  function resetButton() {
+    button.disabled = false;
+    button.classList.remove('is-loading');
+    label.textContent = 'Request a demo';
+  }
+
+  form.addEventListener('submit', async function (event) {
+    event.preventDefault();
+    errorBox.hidden = true;
+
+    var lead = {
+      gym: document.getElementById('gym').value.trim(),
+      name: document.getElementById('name').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      city: document.getElementById('city').value.trim(),
+      trainers: trainersEl.value,
+      message: document.getElementById('message').value.trim(),
+    };
+
+    if (!lead.gym) return fail('Tell us your gym name.', 'gym');
+    if (!lead.name) return fail('Tell us your name.', 'name');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email)) return fail('Enter a valid email address.', 'email');
+    if (!document.getElementById('consent').checked) return fail('Tick the box so we can reply to you.', 'consent');
+
+    button.disabled = true;
+    button.classList.add('is-loading');
+    label.textContent = 'Sending';
+
+    var response = await FitlytixAuth.client.from(window.FITLYTIX.leadsTable).insert(lead);
+
+    if (response.error) {
+      // Say so plainly. Showing a success screen for a lost lead is worse.
+      fail('We could not send that just now. Please email us at <strong>' +
+           window.FITLYTIX.site.supportEmail + '</strong> and we will pick it up.');
+      resetButton();
+      return;
+    }
+
+    document.getElementById('form-state').hidden = true;
+    document.getElementById('sent-state').hidden = false;
+  });
+})();
+</script>
+
+</body>
+</html>

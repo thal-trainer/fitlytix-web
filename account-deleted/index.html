@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account Deleted - FITLYTIX</title>
+  <meta name="description" content="Confirmation that your Fitlytix account has been deleted." />
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+
+<!--
+  Where confirm-deletion sends people after they click the link in their email.
+  The ?status= parameter decides which message shows. Every state is spelled
+  out so nobody is left guessing whether their account is actually gone.
+-->
+
+<main class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <a href="/"><img src="/assets/logo.png" alt="FITLYTIX" width="53" height="40" /></a>
+    </div>
+
+    <div class="auth-result">
+      <div class="result-icon" id="state-icon"></div>
+      <h1 class="auth-title" id="state-title">Working on it</h1>
+      <p class="auth-desc" id="state-desc">One moment.</p>
+      <div id="state-extra"></div>
+    </div>
+
+    <p class="auth-footer">
+      Questions? <a href="/support/">Contact support</a>
+    </p>
+  </div>
+
+  <p class="auth-footer">
+    <a href="/">Back to fitlytix.in</a>
+  </p>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var TICK = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+    '<path d="M5 12L10 17L20 7" stroke="#27AE60" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  var WARN = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+    '<circle cx="12" cy="12" r="9" stroke="#E2703A" stroke-width="1.8"/>' +
+    '<path d="M12 7v5.5l3.5 2" stroke="#E2703A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  var CROSS = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+    '<path d="M7 7l10 10M17 7L7 17" stroke="#e74c3c" stroke-width="2" stroke-linecap="round"/></svg>';
+
+  var STATES = {
+    done: {
+      icon: TICK, tone: 'result-icon-success',
+      title: 'Account deleted',
+      desc: 'Your account and personal details have been removed. You will not be able to log in again, and we have not kept a copy.',
+      extra: '<div class="alert alert-info mt-4" style="text-align:left">Your gym keeps a count of sessions that took place, for its own records. Those counts are no longer linked to you or to any of your details.</div>',
+    },
+    already: {
+      icon: TICK, tone: 'result-icon-success',
+      title: 'Already done',
+      desc: 'This account was deleted earlier. The link only works once, so there is nothing left to do.',
+      extra: '',
+    },
+    expired: {
+      icon: WARN, tone: 'result-icon-warning',
+      title: 'Link expired',
+      desc: 'Confirmation links last seven days. Nothing has been deleted. Send a new request and we will email you a fresh link.',
+      extra: '<a class="btn btn-primary btn-block mt-4" href="/delete-account/">Start again</a>',
+    },
+    invalid: {
+      icon: WARN, tone: 'result-icon-warning',
+      title: 'Link not recognised',
+      desc: 'We could not match this link to a request. Nothing has been deleted. Check you opened the most recent email, or send a new request.',
+      extra: '<a class="btn btn-primary btn-block mt-4" href="/delete-account/">Start again</a>',
+    },
+    error: {
+      icon: CROSS, tone: 'result-icon-error',
+      title: 'Something went wrong',
+      desc: 'We hit a problem and stopped before changing anything. Your account has not been touched. Please contact us and we will sort it out by hand.',
+      extra: '<a class="btn btn-primary btn-block mt-4" href="/support/">Contact support</a>',
+    },
+  };
+
+  var key = new URLSearchParams(window.location.search).get('status') || 'invalid';
+  var state = STATES[key] || STATES.invalid;
+
+  var icon = document.getElementById('state-icon');
+  icon.className = 'result-icon ' + state.tone;
+  icon.innerHTML = state.icon;
+
+  document.getElementById('state-title').textContent = state.title;
+  document.getElementById('state-desc').textContent = state.desc;
+  document.getElementById('state-extra').innerHTML = state.extra;
+})();
+</script>
+
+</body>
+</html>

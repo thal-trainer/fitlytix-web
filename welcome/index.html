@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Set Your Password - FITLYTIX</title>
+  <meta name="description" content="Set your FITLYTIX password and activate your account." />
+
+  <!-- Auth pages carry one-time tokens and must never be indexed. -->
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="referrer" content="no-referrer" />
+
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+
+<main class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <a href="/"><img src="/assets/logo.png" alt="FITLYTIX" width="53" height="40" /></a>
+    </div>
+
+    <!-- State 1: verifying the token from the email link -->
+    <div id="state-loading" class="auth-loading">
+      <div class="spinner" role="status" aria-label="Verifying your link"></div>
+      <p class="auth-loading-text">VERIFYING</p>
+    </div>
+
+    <!-- State 2: the password form -->
+    <div id="state-form" hidden>
+      <h1 class="auth-title" id="form-title">You've been invited</h1>
+      <p class="auth-desc" id="form-desc">Set your password to start training on FITLYTIX.</p>
+
+      <div class="badge badge-square mb-5" id="gym-badge" hidden>
+        <span class="badge-dot"></span>
+        <span class="badge-text" id="gym-name"></span>
+      </div>
+
+      <div class="auth-divider"></div>
+
+      <div class="alert alert-error" id="form-error" role="alert" hidden></div>
+
+      <form id="password-form" novalidate>
+        <!--
+          Supabase already knows which account this token belongs to, but
+          password managers need a username field to offer to save the
+          credential. It is populated from the session and left read-only.
+        -->
+        <div class="field">
+          <label class="field-label" for="account-email">Account</label>
+          <input class="input" type="email" id="account-email" name="username"
+                 autocomplete="username" readonly tabindex="-1" />
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="password">New Password</label>
+          <div class="field-wrap">
+            <input class="input input-with-action" type="password" id="password" name="new-password"
+                   autocomplete="new-password" placeholder="Minimum 8 characters"
+                   aria-describedby="pw-rules" required />
+            <button class="field-action" type="button" data-toggle-password="password">SHOW</button>
+          </div>
+          <ul class="pw-rules" id="pw-rules">
+            <li class="pw-rule" data-rule="length">At least 8 characters</li>
+            <li class="pw-rule" data-rule="letter">Contains a letter</li>
+            <li class="pw-rule" data-rule="number">Contains a number</li>
+          </ul>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="password-confirm">Confirm Password</label>
+          <div class="field-wrap">
+            <input class="input input-with-action" type="password" id="password-confirm"
+                   autocomplete="new-password" placeholder="Re-enter your password" required />
+            <button class="field-action" type="button" data-toggle-password="password-confirm">SHOW</button>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-block mt-4" type="submit" id="submit-btn">
+          <span class="btn-spinner"></span>
+          <span id="submit-text">SET PASSWORD</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- State 3: password saved -->
+    <div id="state-success" class="auth-result" hidden>
+      <div class="result-icon result-icon-success">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M5 12L10 17L20 7" stroke="#27AE60" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h1 class="auth-title">Password Set</h1>
+      <p class="auth-desc" id="success-desc">Your account is ready.</p>
+      <ol class="steps" id="success-steps"></ol>
+    </div>
+
+    <!-- State 4: link expired, already used, or opened directly -->
+    <div id="state-error" class="auth-result" hidden>
+      <div class="result-icon result-icon-warning">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 8v5" stroke="#E67E22" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="12" cy="16.5" r="1.2" fill="#E67E22"/>
+          <path d="M12 3L22 20H2L12 3z" stroke="#E67E22" stroke-width="1.8" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h1 class="auth-title" id="error-title">Link Expired</h1>
+      <p class="auth-desc" id="error-desc">
+        This invitation link has expired or has already been used.
+      </p>
+      <a class="btn btn-primary btn-block" href="/forgot-password/">Request a new link</a>
+      <p class="auth-footer">
+        Still stuck? <a href="/support/">Contact support</a>
+      </p>
+    </div>
+  </div>
+
+  <p class="auth-footer">
+    <a href="/">Back to fitlytix.in</a>
+  </p>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/assets/config.js"></script>
+<script src="/assets/auth.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var STATES = ['state-loading', 'state-form', 'state-success', 'state-error'];
+
+  function show(id) {
+    STATES.forEach(function (state) {
+      document.getElementById(state).hidden = state !== id;
+    });
+  }
+
+  function showError(message) {
+    var box = document.getElementById('form-error');
+    box.textContent = message;
+    box.hidden = false;
+  }
+
+  /* ---- Copy for each of the four ways someone can land here ------------- */
+
+  var COPY = {
+    recovery: {
+      title: 'Reset Your Password',
+      desc: 'Choose a new password for your FITLYTIX account.',
+      button: 'UPDATE PASSWORD',
+      successDesc: 'Your password has been updated. Log in to the FITLYTIX app with your new password.',
+      steps: [
+        'Open the FITLYTIX app on your phone',
+        'Log in with your email and new password',
+        'You are back in',
+      ],
+    },
+    client: {
+      title: 'Your Fitness Account',
+      desc: 'Set your password to view your workouts, sessions and progress on FITLYTIX.',
+      button: 'SET PASSWORD',
+      successDesc: 'Your account is ready. Open the FITLYTIX app and log in to view your fitness data.',
+      steps: [
+        'Open the FITLYTIX app on your phone',
+        'Log in with your email and the password you just set',
+        'View your sessions, workouts and progress',
+      ],
+    },
+    trainer: {
+      title: "You've been invited",
+      desc: 'Set your password to start training on FITLYTIX.',
+      button: 'SET PASSWORD',
+      successDesc: 'Your account is ready. Open the FITLYTIX app and log in with your email and new password.',
+      steps: [
+        'Open the FITLYTIX app on your phone',
+        'Enter your email and the password you just set',
+        'Start managing your clients',
+      ],
+    },
+  };
+
+  var mode = 'trainer';
+  var currentUser = null;
+
+  /* ---- Boot ------------------------------------------------------------- */
+
+  async function init() {
+    var params = FitlytixAuth.readAuthParams();
+    var result = await FitlytixAuth.establishSession(params);
+
+    if (!result.ok) {
+      if (result.reason === 'missing') {
+        document.getElementById('error-title').textContent = 'Trainer Access';
+        document.getElementById('error-desc').textContent =
+          'Open the invitation link sent to your email to set your password and access FITLYTIX.';
+      } else {
+        document.getElementById('error-desc').textContent = result.message;
+      }
+      show('state-error');
+      return;
+    }
+
+    currentUser = result.user;
+
+    if (params.type === 'recovery') mode = 'recovery';
+    else if (params.isClient) mode = 'client';
+    else mode = 'trainer';
+
+    var copy = COPY[mode];
+    document.getElementById('form-title').textContent = copy.title;
+    document.getElementById('form-desc').textContent = copy.desc;
+    document.getElementById('submit-text').textContent = copy.button;
+    document.getElementById('account-email').value = currentUser.email || '';
+
+    // The gym badge is a nicety. Never let a failed lookup block the form.
+    var gym = await FitlytixAuth.getGymName(currentUser);
+    if (gym) {
+      document.getElementById('gym-name').textContent = gym.toUpperCase();
+      document.getElementById('gym-badge').hidden = false;
+    }
+
+    show('state-form');
+    document.getElementById('password').focus();
+  }
+
+  /* ---- Password field behaviour ----------------------------------------- */
+
+  document.querySelectorAll('[data-toggle-password]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      var input = document.getElementById(button.dataset.togglePassword);
+      var reveal = input.type === 'password';
+      input.type = reveal ? 'text' : 'password';
+      button.textContent = reveal ? 'HIDE' : 'SHOW';
+      button.setAttribute('aria-label', reveal ? 'Hide password' : 'Show password');
+    });
+  });
+
+  document.getElementById('password').addEventListener('input', function (event) {
+    var checks = FitlytixAuth.checkPassword(event.target.value);
+    document.querySelectorAll('.pw-rule').forEach(function (rule) {
+      rule.classList.toggle('is-met', Boolean(checks[rule.dataset.rule]));
+    });
+  });
+
+  /* ---- Submit ----------------------------------------------------------- */
+
+  document.getElementById('password-form').addEventListener('submit', async function (event) {
+    event.preventDefault();
+
+    var password = document.getElementById('password').value;
+    var confirm = document.getElementById('password-confirm').value;
+    var button = document.getElementById('submit-btn');
+    var label = document.getElementById('submit-text');
+
+    document.getElementById('form-error').hidden = true;
+
+    if (!FitlytixAuth.isPasswordValid(password)) {
+      showError('Password must be at least 8 characters and include a letter and a number.');
+      return;
+    }
+    if (password !== confirm) {
+      showError('Passwords do not match.');
+      document.getElementById('password-confirm').focus();
+      return;
+    }
+
+    button.disabled = true;
+    button.classList.add('is-loading');
+    label.textContent = 'SAVING...';
+
+    var response = await FitlytixAuth.client.auth.updateUser({ password: password });
+
+    if (response.error) {
+      showError(FitlytixAuth.friendlyError(response.error.message));
+      button.disabled = false;
+      button.classList.remove('is-loading');
+      label.textContent = COPY[mode].button;
+      return;
+    }
+
+    // Trainers came from an invite row that needs closing out. Clients and
+    // password resets have no invite record to update.
+    if (mode === 'trainer') {
+      await FitlytixAuth.markInviteAccepted(currentUser);
+    }
+
+    var copy = COPY[mode];
+    document.getElementById('success-desc').textContent = copy.successDesc;
+    document.getElementById('success-steps').innerHTML = copy.steps
+      .map(function (step) { return '<li></li>'; })
+      .join('');
+    document.querySelectorAll('#success-steps li').forEach(function (li, index) {
+      li.textContent = copy.steps[index];
+    });
+
+    show('state-success');
+  });
+
+  init();
+})();
+</script>
+
+</body>
+</html>
