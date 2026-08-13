@@ -1,0 +1,1530 @@
+/* ==========================================================================
+   FITLYTIX — shared stylesheet
+   Loaded by every page. Page-specific rules go in a <style> block on the page.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Tokens
+   -------------------------------------------------------------------------- */
+
+:root {
+  /* Surfaces */
+  --bg: #000000;
+  --surface: #0d0d0d;
+  --card: #141414;
+  --card-hover: #1a1a1a;
+  --border: #222222;
+  --border-bright: rgba(212, 168, 67, 0.3);
+
+  /* Brand — matches the palette the mobile app is built on */
+  --cream: #F2ECD8;
+  --gold: #D4A843;
+  --gold-bright: #E0B84E;
+  --gold-mid: #C49428;
+
+  --accent: var(--gold);
+  --accent-bright: var(--gold-bright);   /* hover and active states */
+  --accent-deep: var(--gold-mid);        /* pressed states, heavier borders */
+  --accent-dim: rgba(212, 168, 67, 0.12);
+  --accent-faint: rgba(212, 168, 67, 0.05);
+
+  /* Text — warm greys derived from cream so nothing reads cold beside the gold */
+  --text: var(--cream);
+  --text-secondary: #B0AA98;
+  --text-muted: #8A8371;   /* 4.9:1 on --card, the tightest surface it lands on */
+
+  /* Status. Warning is pushed toward red so it stays distinct from the gold
+     accent — plain amber would read as brand colour rather than a caution. */
+  --success: #27AE60;
+  --success-dim: rgba(39, 174, 96, 0.1);
+  --danger: #C0392B;
+  --danger-text: #e74c3c;
+  --danger-dim: rgba(192, 57, 43, 0.1);
+  --warning: #E2703A;
+  --warning-dim: rgba(226, 112, 58, 0.1);
+
+  /* Type */
+  --font-display: 'Bebas Neue', 'Arial Narrow', sans-serif;
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Spacing scale */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+  --sp-9: 80px;
+
+  /* Radii */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 18px;
+  --r-pill: 999px;
+
+  /* Layout */
+  --nav-h: 68px;
+  --content-w: 900px;
+  --wide-w: 1120px;
+}
+
+/* --------------------------------------------------------------------------
+   2. Reset & base
+   -------------------------------------------------------------------------- */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Author-level `display` rules outrank the UA stylesheet's `[hidden]`, so any
+   component with an explicit display (.auth-loading, .badge, .row) would stay
+   visible when script hides it. Pages toggle state entirely via `hidden`, so
+   this has to win. */
+[hidden] { display: none !important; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--nav-h) + var(--sp-4));
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img, svg, video { max-width: 100%; height: auto; display: block; }
+
+a { color: var(--accent); }
+
+::selection { background: var(--accent); color: #000; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+/* Ambient gradient wash, sits behind all content */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 80% 0%, rgba(212, 168, 67, 0.07) 0%, transparent 50%),
+    radial-gradient(ellipse at 0% 100%, rgba(212, 168, 67, 0.04) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Everything that should sit above the wash */
+nav, main, section, footer, .hero { position: relative; z-index: 1; }
+
+/* Skip link for keyboard and screen-reader users */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 300;
+  background: var(--accent);
+  color: #000;
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: 0 0 var(--r-md) 0;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.skip-link:focus { left: 0; }
+
+/* --------------------------------------------------------------------------
+   3. Navigation
+   -------------------------------------------------------------------------- */
+
+/* Links sit next to the logo; the action group is pushed right with an auto
+   margin so the sign-in link and demo button always stay paired. */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  height: var(--nav-h);
+  padding: 0 var(--sp-5);
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-logo { display: flex; align-items: center; flex-shrink: 0; }
+.nav-logo img { height: 30px; width: auto; }
+
+.nav-links { display: flex; align-items: center; gap: 26px; margin-left: 12px; }
+
+.nav-link {
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.18s;
+  white-space: nowrap;
+}
+
+.nav-link:hover,
+.nav-link[aria-current="page"] { color: var(--accent); }
+
+.nav-actions { margin-left: auto; display: flex; align-items: center; gap: 18px; }
+
+/* Deliberately quiet, and kept apart from the primary call to action. */
+.nav-signin { font-size: 13px; color: var(--text-muted); text-decoration: none; white-space: nowrap; }
+.nav-signin:hover { color: var(--text-secondary); }
+
+/* Hamburger — hidden on desktop, revealed under 820px */
+.nav-toggle {
+  display: none;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 7px 9px;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.nav-toggle:hover { border-color: var(--accent); }
+.nav-toggle span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--text-secondary);
+  border-radius: 2px;
+}
+.nav-toggle span + span { margin-top: 4px; }
+
+/* Pages with a fixed nav need their content pushed down */
+.has-nav { padding-top: var(--nav-h); }
+
+/* --------------------------------------------------------------------------
+   4. Buttons
+   -------------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  padding: 14px 28px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s, border-color 0.2s, color 0.2s, background 0.2s;
+  white-space: nowrap;
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] { opacity: 0.4; cursor: not-allowed; }
+
+/* Gold has enough range to brighten on hover, which reads better than the
+   opacity fade the purple relied on — fading gold toward black muddies it. */
+.btn-primary { background: var(--accent); color: #000; }
+.btn-primary:hover:not(:disabled) { background: var(--accent-bright); }
+.btn-primary:active:not(:disabled) { background: var(--accent-deep); }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-secondary);
+  border-color: var(--border);
+  letter-spacing: 1px;
+  text-transform: none;
+}
+.btn-secondary:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  padding: 10px 14px;
+  text-transform: none;
+  letter-spacing: 0.5px;
+}
+.btn-ghost:hover:not(:disabled) { color: var(--accent); }
+
+/* Compact variant used in the nav */
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 12px;
+  border-radius: var(--r-sm);
+}
+
+.btn-block { width: 100%; }
+
+/* Inline spinner for pending button states */
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(0,0,0,0.2);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: none;
+  flex-shrink: 0;
+}
+
+.btn.is-loading .btn-spinner { display: block; }
+
+/* --------------------------------------------------------------------------
+   5. Layout & headings
+   -------------------------------------------------------------------------- */
+
+.section {
+  padding: var(--sp-9) var(--sp-5);
+  max-width: var(--content-w);
+  margin: 0 auto;
+}
+
+.section-wide { max-width: var(--wide-w); }
+.section-tight { padding-top: var(--sp-7); padding-bottom: var(--sp-7); }
+
+.section-label {
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: var(--sp-3);
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 6vw, 52px);
+  font-weight: 400;
+  letter-spacing: 2px;
+  line-height: 1;
+  margin-bottom: var(--sp-4);
+}
+
+.section-desc {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  max-width: 560px;
+  margin-bottom: var(--sp-7);
+}
+
+.divider {
+  height: 1px;
+  background: var(--border);
+  max-width: var(--content-w);
+  margin: 0 auto;
+}
+
+/* A divider separating rows inside a wide section should span that section,
+   not the narrower default measure, or it reads as misaligned. */
+.section-wide > .divider { max-width: none; }
+
+/* Small pill used for status / context flags */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  background: var(--accent-dim);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--r-pill);
+  padding: 6px 14px;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.badge-dot-live { animation: pulse 2s infinite; }
+
+.badge-text {
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.badge-square { border-radius: var(--r-sm); padding: 5px 10px; }
+
+/* --------------------------------------------------------------------------
+   6. Cards
+   -------------------------------------------------------------------------- */
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--sp-5);
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.card-interactive:hover { border-color: var(--border-bright); background: var(--card-hover); }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--sp-4);
+}
+
+.grid-2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+
+.card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-md);
+  background: var(--accent-dim);
+  border: 1px solid rgba(212, 168, 67, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--sp-4);
+  flex-shrink: 0;
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--sp-2);
+}
+
+.card-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Stats row */
+.stats-row { display: flex; gap: var(--sp-4); flex-wrap: wrap; }
+
+.stat-card {
+  flex: 1;
+  min-width: 120px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--sp-5);
+  text-align: center;
+}
+
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 42px;
+  color: var(--accent);
+  letter-spacing: 2px;
+  line-height: 1;
+  margin-bottom: var(--sp-2);
+}
+
+.stat-label { font-size: 12px; color: var(--text-muted); letter-spacing: 1px; }
+
+/* --------------------------------------------------------------------------
+   7. Forms
+   -------------------------------------------------------------------------- */
+
+.field { margin-bottom: var(--sp-4); }
+
+.field-label {
+  display: block;
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: var(--sp-2);
+}
+
+.field-wrap { position: relative; }
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 13px 14px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.4;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+/* Extra right padding when a show/hide button overlays the field */
+.input-with-action { padding-right: 60px; }
+
+.input:focus,
+.select:focus,
+.textarea:focus { border-color: var(--accent); }
+
+.input::placeholder,
+.textarea::placeholder { color: var(--text-muted); }
+
+.input[aria-invalid="true"] { border-color: var(--danger); }
+
+.textarea { resize: vertical; min-height: 110px; }
+
+.select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%238A8371' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
+  cursor: pointer;
+}
+
+.select option { background: var(--surface); color: var(--text); }
+
+/* Show / hide toggle inside password fields */
+.field-action {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  padding: 4px;
+}
+
+.field-action:hover { color: var(--text-secondary); }
+
+.field-hint { font-size: 11px; color: var(--text-muted); margin-top: var(--sp-2); line-height: 1.5; }
+
+.checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.checkbox-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+/* --------------------------------------------------------------------------
+   8. Alerts
+   -------------------------------------------------------------------------- */
+
+.alert {
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+  font-size: 12px;
+  line-height: 1.5;
+  margin-bottom: var(--sp-4);
+}
+
+.alert-error   { background: var(--danger-dim);  border: 1px solid rgba(192,57,43,0.4);  color: var(--danger-text); }
+.alert-success { background: var(--success-dim); border: 1px solid rgba(39,174,96,0.4);  color: var(--success); }
+.alert-warning { background: var(--warning-dim); border: 1px solid rgba(230,126,34,0.4); color: var(--warning); }
+.alert-info    { background: var(--accent-faint); border: 1px solid var(--border);        color: var(--text-secondary); }
+
+/* --------------------------------------------------------------------------
+   9. Auth pages (/welcome, /forgot-password, /link-expired)
+   -------------------------------------------------------------------------- */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-5);
+  gap: var(--sp-5);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 28px 24px;
+  animation: fadeUp 0.4s ease both;
+}
+
+.auth-logo { text-align: center; margin-bottom: var(--sp-5); }
+.auth-logo img { height: 40px; width: auto; margin: 0 auto; }
+
+.auth-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  line-height: 1.1;
+  margin-bottom: var(--sp-2);
+}
+
+.auth-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--sp-5);
+}
+
+.auth-divider { height: 1px; background: var(--border); margin: var(--sp-4) 0; }
+
+.auth-footer {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: var(--sp-5);
+}
+
+.auth-footer a { color: var(--text-secondary); text-decoration: none; }
+.auth-footer a:hover { color: var(--accent); }
+
+/* Loading state while a token is being verified */
+.auth-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-4) 0;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 2px solid rgba(212, 168, 67, 0.2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.auth-loading-text { font-size: 12px; color: var(--text-muted); letter-spacing: 1px; }
+
+/* Result state — success or failure */
+.auth-result { text-align: center; padding: var(--sp-2) 0; }
+
+.result-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--sp-4);
+}
+
+.result-icon-success { background: var(--success-dim); border: 1px solid rgba(39,174,96,0.4); }
+.result-icon-error   { background: var(--danger-dim);  border: 1px solid rgba(192,57,43,0.4); }
+.result-icon-warning { background: var(--warning-dim); border: 1px solid rgba(230,126,34,0.4); }
+
+/* Numbered "what to do next" list */
+.steps {
+  text-align: left;
+  background: var(--accent-faint);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--sp-4);
+  list-style: none;
+  counter-reset: step;
+}
+
+.steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  counter-increment: step;
+}
+
+.steps li + li { margin-top: var(--sp-3); }
+
+.steps li::before {
+  content: counter(step);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 1px solid var(--border-bright);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--accent);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+/* Password requirement checklist */
+.pw-rules { list-style: none; margin-top: var(--sp-3); }
+
+.pw-rule {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  transition: color 0.2s;
+}
+
+.pw-rule::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.pw-rule.is-met { color: var(--success); }
+
+/* --------------------------------------------------------------------------
+   10. Prose — legal and long-form pages
+   -------------------------------------------------------------------------- */
+
+.prose { max-width: 720px; font-size: 15px; color: var(--text-secondary); line-height: 1.75; }
+
+.prose h2 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  color: var(--text);
+  margin: var(--sp-7) 0 var(--sp-4);
+  line-height: 1.2;
+}
+
+.prose h3 {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+  margin: var(--sp-5) 0 var(--sp-3);
+}
+
+.prose h2:first-child, .prose h3:first-child { margin-top: 0; }
+
+.prose p { margin-bottom: var(--sp-4); }
+
+.prose ul, .prose ol { margin: 0 0 var(--sp-4) var(--sp-5); }
+.prose li { margin-bottom: var(--sp-2); }
+.prose li::marker { color: var(--accent); }
+
+.prose strong { color: var(--text); font-weight: 500; }
+
+.prose a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+
+.prose hr { border: none; height: 1px; background: var(--border); margin: var(--sp-6) 0; }
+
+/* Tables scroll inside their own container so the page never scrolls sideways */
+.table-scroll { overflow-x: auto; margin-bottom: var(--sp-4); }
+
+.prose table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 480px; }
+
+.prose th, .prose td {
+  text-align: left;
+  padding: var(--sp-3);
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.prose th {
+  color: var(--text);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.page-header { padding: var(--sp-8) var(--sp-5) var(--sp-5); max-width: 720px; margin: 0 auto; }
+
+.page-title {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 8vw, 56px);
+  font-weight: 400;
+  letter-spacing: 2px;
+  line-height: 1;
+  margin-bottom: var(--sp-3);
+}
+
+.page-meta { font-size: 12px; color: var(--text-muted); letter-spacing: 1px; }
+
+/* --------------------------------------------------------------------------
+   11. Footer
+   -------------------------------------------------------------------------- */
+
+.footer { border-top: 1px solid var(--border); padding: var(--sp-7) var(--sp-5) var(--sp-5); margin-top: var(--sp-8); }
+
+.footer-inner {
+  max-width: var(--wide-w);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.5fr repeat(3, 1fr);
+  gap: var(--sp-6);
+}
+
+.footer-brand img { height: 28px; width: auto; margin-bottom: var(--sp-3); }
+.footer-tagline { font-size: 12px; color: var(--text-muted); line-height: 1.6; max-width: 240px; }
+
+.footer-col-title {
+  font-size: 10px;
+  color: var(--text);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: var(--sp-3);
+}
+
+.footer-links { list-style: none; }
+.footer-links li { margin-bottom: var(--sp-2); }
+
+.footer-links a {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-links a:hover { color: var(--accent); }
+
+.footer-bottom {
+  max-width: var(--wide-w);
+  margin: var(--sp-6) auto 0;
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+
+.footer-text { font-size: 11px; color: var(--text-muted); letter-spacing: 0.5px; }
+
+/* --------------------------------------------------------------------------
+   12. Utilities
+   -------------------------------------------------------------------------- */
+
+.text-center { text-align: center; }
+.text-muted { color: var(--text-muted); }
+.text-secondary { color: var(--text-secondary); }
+.text-accent { color: var(--accent); }
+
+.mt-2 { margin-top: var(--sp-2); }
+.mt-4 { margin-top: var(--sp-4); }
+.mt-5 { margin-top: var(--sp-5); }
+.mb-0 { margin-bottom: 0; }
+.mb-4 { margin-bottom: var(--sp-4); }
+.mb-5 { margin-bottom: var(--sp-5); }
+
+.stack { display: flex; flex-direction: column; gap: var(--sp-3); }
+.row { display: flex; gap: var(--sp-3); flex-wrap: wrap; }
+.row-center { justify-content: center; }
+.row-between { justify-content: space-between; align-items: center; }
+
+/* Visible only to screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   13. Animations
+   -------------------------------------------------------------------------- */
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --------------------------------------------------------------------------
+   14. Responsive
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 820px) {
+  .nav-toggle { display: block; }
+
+  /* Collapse the links into a dropdown panel below the bar */
+  .nav-links {
+    position: absolute;
+    top: var(--nav-h);
+    left: 0; right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    background: rgba(0,0,0,0.97);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: var(--sp-2) var(--sp-5) var(--sp-4);
+    display: none;
+  }
+
+  .nav-links.is-open { display: flex; }
+
+  .nav-link { padding: var(--sp-3) 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .nav-link:last-child { border-bottom: none; }
+}
+
+@media (max-width: 600px) {
+  .section { padding: var(--sp-7) var(--sp-5); }
+  .stats-row { gap: var(--sp-3); }
+  .footer-inner { grid-template-columns: 1fr 1fr; gap: var(--sp-5); }
+  .footer-brand { grid-column: 1 / -1; }
+  .footer-bottom { flex-direction: column; align-items: flex-start; }
+  .auth-card { padding: 24px 20px; }
+}
+
+/* --------------------------------------------------------------------------
+   15. Reduced motion & print
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  body::before, .nav, .footer { display: none; }
+  body { background: #fff; color: #000; }
+  .prose, .page-title { color: #000; }
+}
+
+/* ==========================================================================
+   16. Product mockups
+
+   Gym owners buy what they can see. There are no app screenshots yet, so the
+   product is drawn in CSS — a phone frame with a believable trainer screen
+   inside, plus the standalone cards that get floated beside it. All of it
+   scales with --device-w so a whole composition can be resized at once.
+   ========================================================================== */
+
+.device {
+  --device-w: 268px;
+  width: var(--device-w);
+  aspect-ratio: 9 / 19;
+  flex-shrink: 0;
+  background: #0a0a0a;
+  border: 8px solid #1c1a15;
+  border-radius: 38px;
+  padding: 8px 6px;
+  position: relative;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,168,67,0.12);
+}
+
+/* Camera pill */
+.device::before {
+  content: '';
+  position: absolute;
+  top: 14px; left: 50%;
+  transform: translateX(-50%);
+  width: 62px; height: 5px;
+  background: #1c1a15;
+  border-radius: 999px;
+  z-index: 2;
+}
+
+.device-screen {
+  height: 100%;
+  background: var(--bg);
+  border-radius: 30px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 26px 14px 0;
+  /* The hero centres its text on mobile; a real app screen never would, so
+     stop that cascading into the mockup. */
+  text-align: left;
+}
+
+.app-head { margin-bottom: 14px; }
+
+.app-eyebrow {
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 3px;
+}
+
+.app-title {
+  font-family: var(--font-display);
+  font-size: 19px;
+  letter-spacing: 1px;
+  color: var(--text);
+  line-height: 1;
+}
+
+/* A session in the trainer's day */
+.app-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 10px;
+  margin-bottom: 7px;
+}
+
+.app-row-live { border-color: rgba(212,168,67,0.45); background: rgba(212,168,67,0.07); }
+
+.app-time {
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.5px;
+  line-height: 1;
+  width: 38px;
+  flex-shrink: 0;
+}
+
+/* min-width:0 lets this shrink below its content width; without it the name
+   and subtitle wrap, rows grow past 70px, and the tab bar is pushed off the
+   bottom of a fixed-height screen. */
+.app-row-body { flex: 1; min-width: 0; }
+
+.app-row-name,
+.app-row-sub {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-row-name { font-size: 10.5px; color: var(--text); line-height: 1.35; }
+.app-row-sub { font-size: 8.5px; color: var(--text-muted); line-height: 1.35; }
+
+.app-chip {
+  margin-left: auto;
+  font-size: 7px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 3px 6px;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.app-chip-done { background: rgba(39,174,96,0.14); color: var(--success); }
+.app-chip-now  { background: rgba(212,168,67,0.18); color: var(--accent); }
+.app-chip-next { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+
+/* Bottom navigation */
+.app-tabs {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-top: 1px solid var(--border);
+  padding: 9px 0 12px;
+}
+
+.app-tab {
+  width: 15px; height: 15px;
+  border-radius: 4px;
+  background: #232019;
+}
+
+.app-tab-on { background: var(--accent); }
+
+/* --- Standalone cards, floated over or beside the phone ------------------ */
+
+.mock-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--sp-4);
+  box-shadow: 0 20px 45px rgba(0,0,0,0.6);
+  text-align: left;
+}
+
+.mock-label {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--sp-2);
+}
+
+.mock-value {
+  font-family: var(--font-display);
+  font-size: 30px;
+  color: var(--text);
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+.mock-delta { font-size: 11px; color: var(--success); margin-top: 4px; }
+
+.mock-chart { width: 100%; height: auto; display: block; margin-top: var(--sp-3); }
+
+/* Composition wrapper: phone plus the cards that overlap it.
+   Capped and centred so the float offsets below stay predictable instead of
+   drifting with the column width — percentages made the cards swallow the
+   phone's header on narrower desktops. */
+.device-stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  /* width:100% is load-bearing — as a grid item, `margin-inline:auto` alone
+     overrides the default stretch and collapses this to the phone's width,
+     which drags the floats on top of the screen. */
+  width: 100%;
+  max-width: 500px;
+  justify-self: center;
+  margin-inline: auto;
+  padding: var(--sp-5) 0;
+}
+
+.stage-float {
+  position: absolute;
+  width: 156px;
+  z-index: 3;
+}
+
+/* Both sit below the phone's header row, so they overlap chrome rather than
+   the content that has to stay readable. */
+.stage-float-tl { top: 92px;    left: -28px; }
+.stage-float-br { bottom: 56px; right: -28px; }
+
+/* Below 620px the floats would sit on top of the phone, so the composition
+   collapses to the phone alone — which frees width to make it a little larger
+   and keep the session rows readable. */
+@media (max-width: 620px) {
+  .stage-float { display: none; }
+  .device { --device-w: 264px; }
+  .device-stage { padding: var(--sp-3) 0; }
+}
+
+/* --- Big-number metrics -------------------------------------------------- */
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--sp-4);
+}
+
+.metric {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--sp-5);
+}
+
+.metric-value {
+  font-family: var(--font-display);
+  font-size: clamp(44px, 7vw, 60px);
+  color: var(--accent);
+  letter-spacing: 1px;
+  line-height: 0.9;
+  margin-bottom: var(--sp-3);
+}
+
+.metric-text { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+
+/* --- Alternating showcase rows ------------------------------------------- */
+
+.showcase {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-8);
+  align-items: center;
+  padding: var(--sp-8) 0;
+}
+
+/* Pull the visual to the left on every other row */
+.showcase-flip .showcase-visual { order: -1; }
+
+.showcase-eyebrow {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: var(--sp-3);
+}
+
+.showcase-title {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 4.5vw, 44px);
+  font-weight: 400;
+  letter-spacing: 1.5px;
+  line-height: 1;
+  margin-bottom: var(--sp-4);
+}
+
+.showcase-text { font-size: 16px; color: var(--text-secondary); line-height: 1.65; }
+
+.showcase-visual { display: flex; justify-content: center; }
+
+@media (max-width: 820px) {
+  .showcase { grid-template-columns: 1fr; gap: var(--sp-5); padding: var(--sp-7) 0; }
+  /* Visual always leads on mobile, regardless of desktop alternation */
+  .showcase-flip .showcase-visual { order: 0; }
+}
+
+/* ==========================================================================
+   17. Page kit
+
+   The section vocabulary every marketing page is assembled from. Pages should
+   compose these rather than inventing their own layout in a page <style>.
+   ========================================================================== */
+
+.wrap { max-width: var(--wide-w); margin: 0 auto; padding-inline: var(--sp-5); }
+
+.band { padding: 88px 0; }
+.band-tight { padding: 56px 0; }
+.band-line { border-top: 1px solid var(--border); }
+
+.kicker {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+
+.sec-h {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(32px, 4.6vw, 48px);
+  letter-spacing: 1.5px;
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.lede { font-size: 17px; color: var(--text-secondary); line-height: 1.65; max-width: 560px; }
+
+.center { text-align: center; }
+.center .lede { margin-inline: auto; }
+
+.band-head { margin-bottom: 38px; }
+
+/* --- Hero ---------------------------------------------------------------- */
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 56px;
+  align-items: center;
+  padding: 72px 0 88px;
+}
+
+.hero-h {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(44px, 5.6vw, 72px);
+  letter-spacing: 2px;
+  line-height: 0.95;
+  margin: 18px 0 20px;
+}
+
+/* <em> marks the accented words without implying emphasis semantics */
+.hero-h em { font-style: normal; color: var(--accent); }
+
+.hero-sub { font-size: 18px; color: var(--text-secondary); line-height: 1.6; max-width: 460px; margin-bottom: 30px; }
+
+.reassure { font-size: 13px; color: var(--text-muted); margin-top: 18px; }
+
+/* Single-column hero for pages with no product visual */
+.hero-solo { grid-template-columns: 1fr; text-align: center; padding: 64px 0 56px; }
+.hero-solo .hero-sub { margin-inline: auto; }
+.hero-solo .row { justify-content: center; }
+.hero-solo .badge { margin-inline: auto; }
+
+/* --- Trust strip --------------------------------------------------------- */
+
+.trust { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-top: 26px; }
+
+.trust-slot {
+  border: 1px dashed var(--border);
+  border-radius: var(--r-md);
+  padding: 22px 12px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  line-height: 1.5;
+}
+
+/* --- Problem ------------------------------------------------------------- */
+
+.pains { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+
+.pain {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 22px;
+  font-size: 16px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.pain span { display: block; margin-top: 12px; font-size: 13px; color: var(--text-muted); }
+
+/* The resolution callout that closes a problem section. Centred and given a
+   heavier gold panel so it reads as the answer rather than another list item. */
+.fix {
+  margin-top: 28px;
+  padding: 34px 32px;
+  background: rgba(212,168,67,0.14);
+  border: 1px solid rgba(212,168,67,0.45);
+  border-radius: var(--r-xl);
+  font-size: 18px;
+  color: var(--text);
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* --- Feature cards ------------------------------------------------------- */
+
+/* Fixed at three columns so six cards land 3 + 3 rather than 4 + 2 */
+.feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+.feat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  transition: border-color 0.2s;
+}
+
+.feat:hover { border-color: var(--border-bright); }
+
+.feat-ico {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(212,168,67,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.feat h3 { font-size: 17px; font-weight: 500; margin-bottom: 8px; }
+.feat p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+/* --- Audience columns ---------------------------------------------------- */
+
+.who { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+
+.who-col { background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 26px; }
+
+.who-tag {
+  display: inline-block;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #000;
+  background: var(--accent);
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  margin-bottom: 18px;
+}
+
+.who-col ul { list-style: none; }
+
+.who-col li {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  padding-left: 22px;
+  position: relative;
+  margin-bottom: 11px;
+}
+
+.who-col li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 9px;
+  height: 2px;
+  background: var(--accent);
+}
+
+/* --- Steps --------------------------------------------------------------- */
+
+.steps4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 22px; }
+
+.step4 { padding-top: 20px; border-top: 2px solid var(--border); }
+.step4:first-child { border-top-color: var(--accent); }
+
+.step4 b {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 2px;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.step4 h3 { font-size: 16px; font-weight: 500; margin-bottom: 7px; }
+.step4 p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+/* --- Placeholder panel --------------------------------------------------- */
+
+/* Dashed on purpose: it must never be mistaken for finished content */
+.result-ph { border: 1px dashed var(--border); border-radius: var(--r-xl); padding: 48px 24px; text-align: center; }
+.result-ph p { font-size: 14px; color: var(--text-muted); line-height: 1.7; max-width: 460px; margin: 0 auto; }
+
+/* --- Pricing teaser ------------------------------------------------------ */
+
+.price-teaser {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  flex-wrap: wrap;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 34px;
+}
+
+/* --- FAQ ----------------------------------------------------------------- */
+
+.faq { border-bottom: 1px solid var(--border); padding: 18px 0; }
+
+.faq summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: '+'; color: var(--accent); font-size: 20px; line-height: 1; flex-shrink: 0; }
+.faq[open] summary::after { content: '\2212'; }
+.faq summary:hover { color: var(--accent); }
+
+.faq-body { font-size: 15px; color: var(--text-secondary); line-height: 1.7; padding-top: 12px; max-width: 660px; }
+.faq-body a { color: var(--accent); }
+
+/* --- Reassurance row ----------------------------------------------------- */
+
+.sec { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+.sec-item { padding: 20px 0; }
+.sec-item .sec-ico { display: block; margin-bottom: 12px; }
+.sec-item h3 { font-size: 15px; font-weight: 500; margin-bottom: 7px; }
+.sec-item p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+/* --- Closing call to action ---------------------------------------------- */
+
+.final {
+  background: linear-gradient(155deg, rgba(212,168,67,0.12), rgba(212,168,67,0.02));
+  border: 1px solid var(--border-bright);
+  border-radius: 22px;
+  padding: 72px 28px;
+  text-align: center;
+}
+
+.final h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(34px, 5.4vw, 54px);
+  letter-spacing: 2px;
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+/* The closing line is one short sentence, not a paragraph, so let it sit on a
+   single line instead of breaking at the default 560px reading measure. */
+.final .lede { max-width: 800px; }
+
+.risk { display: flex; gap: 26px; justify-content: center; flex-wrap: wrap; margin-top: 26px; }
+.risk span { font-size: 13px; color: var(--text-muted); }
+
+/* --- Store badges -------------------------------------------------------- */
+
+.badges { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+
+.store {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 9px 14px;
+  text-decoration: none;
+  background: var(--card);
+}
+
+.store:hover { border-color: var(--border-bright); }
+.store small { display: block; font-size: 9px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; }
+.store b { display: block; font-size: 13px; color: var(--text); font-weight: 500; }
+
+/* --- Page kit responsive ------------------------------------------------- */
+
+@media (max-width: 940px) {
+  .feats { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 32px;
+    padding: 44px 0 56px;
+  }
+  .hero-sub { margin-inline: auto; }
+  .hero .row { justify-content: center; }
+  .hero .badge { margin-inline: auto; }
+  .band { padding: 60px 0; }
+  .price-teaser { flex-direction: column; align-items: flex-start; }
+}
+
+@media (max-width: 620px) {
+  .feats { grid-template-columns: 1fr; }
+  .final { padding: 52px 20px; }
+}

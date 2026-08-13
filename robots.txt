@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Auth pages carry one-time tokens and have nothing to index.
+Disallow: /welcome/
+Disallow: /forgot-password/
+Disallow: /link-expired/
+
+# Source copies of the Supabase email templates. Nothing sensitive, but there
+# is no reason for them to appear in search results.
+Disallow: /emails/
+
+Sitemap: https://fitlytix.in/sitemap.xml

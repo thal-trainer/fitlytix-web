@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Link Expired - FITLYTIX</title>
+  <meta name="description" content="This FITLYTIX link has expired. Request a new one." />
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+
+<main class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <a href="/"><img src="/assets/logo.png" alt="FITLYTIX" width="53" height="40" /></a>
+    </div>
+
+    <div class="auth-result">
+      <div class="result-icon result-icon-warning">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" stroke="#E67E22" stroke-width="1.8"/>
+          <path d="M12 7v5.5l3.5 2" stroke="#E67E22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
+      <h1 class="auth-title">Link Expired</h1>
+      <p class="auth-desc" id="reason">
+        Sign-in links can only be used once, and they expire for security.
+        Request a fresh one below.
+      </p>
+
+      <a class="btn btn-primary btn-block" href="/forgot-password/">Request a new link</a>
+
+      <div class="auth-divider mt-5"></div>
+
+      <div class="alert alert-info text-center mb-0">
+        Invited to a gym but never received an email? Ask your trainer or gym
+        admin to resend the invitation from the FITLYTIX admin panel.
+      </div>
+    </div>
+
+    <p class="auth-footer">
+      Need a hand? <a href="/support/">Contact support</a>
+    </p>
+  </div>
+
+  <p class="auth-footer">
+    <a href="/">Back to fitlytix.in</a>
+  </p>
+</main>
+
+<script>
+  // Supabase appends the failure reason to the redirect. Surfacing it saves a
+  // support round-trip when the cause is something other than plain expiry.
+  (function () {
+    var params = new URLSearchParams(window.location.hash.replace(/^#/, '') || window.location.search);
+    var description = params.get('error_description');
+    if (!description) return;
+
+    var text = description.replace(/\+/g, ' ');
+    if (!/expired|invalid/i.test(text)) {
+      document.getElementById('reason').textContent = text;
+    }
+  })();
+</script>
+
+</body>
+</html>

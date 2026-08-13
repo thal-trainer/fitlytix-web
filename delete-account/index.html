@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Delete Your Account - FITLYTIX</title>
+  <meta name="description" content="Request deletion of your FITLYTIX account and associated data. No login required." />
+
+  <meta property="og:title" content="Delete Your FITLYTIX Account" />
+  <meta property="og:description" content="Request deletion of your FITLYTIX account and data." />
+  <meta property="og:url" content="https://fitlytix.in/delete-account/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://fitlytix.in/assets/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="canonical" href="https://fitlytix.in/delete-account/" />
+
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body class="has-nav">
+
+<!--
+  Google Play requires this page to be publicly reachable without signing in or
+  installing the app, and it must state what is deleted and what is retained.
+  Keep it linked from the footer of every page and from the Play listing.
+-->
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<nav class="nav">
+  <a class="nav-logo" href="/"><img src="/assets/logo-mark.png" alt="FITLYTIX" width="50" height="30" /></a>
+  <div class="nav-links" id="nav-links">
+    <a class="nav-link" href="/features/">Features</a>
+    <a class="nav-link" href="/pricing/">Pricing</a>
+    <a class="nav-link" href="/for-gyms/">Who it's for</a>
+    <a class="nav-link" href="/support/">Support</a>
+  </div>
+  <div class="nav-actions">
+    <a class="btn btn-primary btn-sm" href="/demo/">Book a demo</a>
+  </div>
+  <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<main id="main">
+  <header class="page-header">
+    <h1 class="page-title">Delete Your Account</h1>
+    <p class="page-meta">Applies to the FITLYTIX app and fitlytix.in</p>
+  </header>
+
+  <div class="section section-tight">
+    <div class="prose">
+
+      <p>
+        You can delete your FITLYTIX account and the personal data attached to it
+        at any time. There are two ways to do it.
+      </p>
+
+      <h2>Option 1: In the app</h2>
+      <ol>
+        <li>Open FITLYTIX and go to <strong>Profile</strong></li>
+        <li>Tap <strong>Settings</strong>, then <strong>Delete Account</strong></li>
+        <li>Confirm. Your account is scheduled for deletion immediately</li>
+      </ol>
+
+      <h2>Option 2: Request it here</h2>
+      <p>
+        No app or login needed. Fill this in and we will email that address a
+        confirmation link. Nothing is deleted until you click it, which is how
+        we make sure nobody can close someone else's account.
+      </p>
+
+      <form id="deletion-form" class="card mb-5" style="max-width:520px;">
+        <div class="field">
+          <label class="field-label" for="email">Email on your account</label>
+          <input class="input" type="email" id="email" inputmode="email"
+                 autocomplete="email" placeholder="you@example.com" required />
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="gym">Your gym</label>
+          <input class="input" type="text" id="gym" placeholder="e.g. Thal Fitness Coliseum" />
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="scope">What should we delete</label>
+          <select class="select" id="scope">
+            <option value="Everything - full account deletion">Everything, delete my account</option>
+            <option value="Health and training data only, keep the account">Health and training data only, keep my account</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="reason">Anything you want to tell us (optional)</label>
+          <textarea class="textarea" id="reason" placeholder="Optional"></textarea>
+        </div>
+
+        <div class="alert alert-error" id="form-error" role="alert" hidden></div>
+
+        <button class="btn btn-primary btn-block" type="submit" id="del-submit">
+          <span class="btn-spinner"></span>
+          <span id="del-submit-text">Send deletion request</span>
+        </button>
+        <p class="field-hint">
+          We will email that address to confirm it is really you. Nothing is
+          deleted until you click the link in that email.
+        </p>
+      </form>
+
+      <div id="del-sent" class="card text-center" style="max-width:520px; display:none;">
+        <div class="result-icon result-icon-success">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="2.5" y="5" width="19" height="14" rx="2" stroke="#27AE60" stroke-width="1.8"/>
+            <path d="M3 6.5L12 13L21 6.5" stroke="#27AE60" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h2 style="margin-top:0">Check your email</h2>
+        <p class="card-desc">
+          We have sent a confirmation link to <strong id="del-sent-email" class="text-accent"></strong>.
+          Click it and we will start the deletion. If you do nothing, your
+          account stays exactly as it is.
+        </p>
+      </div>
+
+      <h2>What gets deleted</h2>
+      <ul>
+        <li>Your name, email address and phone number</li>
+        <li>Your profile, goals, fitness level and injury notes</li>
+        <li>All body metrics and progress history</li>
+        <li>Workout programs and nutrition plans assigned to you</li>
+        <li>Your login credentials, so you can no longer sign in</li>
+        <li>Your name and details on every session you attended</li>
+      </ul>
+      <p>Live systems are cleared within <strong>30 days</strong>. Encrypted backups roll off within <strong>90 days</strong>.</p>
+
+      <h2>What we keep, and why</h2>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>Retained</th><th>Why</th><th>How long</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Invoices and payment records</td>
+              <td>Required by Indian tax law</td>
+              <td>As legally required</td>
+            </tr>
+            <tr>
+              <td>A count of sessions that took place, with your name and details removed</td>
+              <td>The gym's own attendance and revenue record. Once your details are gone these cannot be traced back to you</td>
+              <td>Indefinitely</td>
+            </tr>
+            <tr>
+              <td>Security logs of the deletion itself</td>
+              <td>Proof the request was honoured</td>
+              <td>12 months</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>If you are a gym client</h2>
+      <p>
+        Your gym is the controller of your training records. Deleting your account
+        removes your access and your personal identifiers. Your gym may retain
+        anonymised session counts for its own business records. These cannot be
+        linked back to you. If you want your gym's copy removed too, ask them
+        directly, and tell us if they do not respond.
+      </p>
+
+      <h2>If you are a gym owner</h2>
+      <p>
+        Deleting a gym account removes every trainer and client account under it.
+        This cannot be undone. Request an export first if you need your records.
+        Write to <a href="/support/">support</a> and we will send a full export
+        before anything is deleted.
+      </p>
+
+      <div class="alert alert-warning">
+        <strong>Deletion is permanent.</strong> Once processed, we cannot restore
+        your data, your history or your plans. Export anything you want to keep first.
+      </div>
+
+      <h2>Questions</h2>
+      <p>
+        Email <a id="support-link" href="/support/">our support team</a> or read the
+        <a href="/privacy/">Privacy Policy</a> for the full picture on data handling.
+      </p>
+
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo.png" alt="FITLYTIX" width="53" height="40" />
+      <p class="footer-tagline">One app to run your whole gym.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Product</div>
+      <ul class="footer-links">
+        <li><a href="/features/">Features</a></li>
+        <li><a href="/pricing/">Pricing</a></li>
+        <li><a href="/for-gyms/">Who it's for</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Company</div>
+      <ul class="footer-links">
+        <li><a href="/demo/">Book a demo</a></li>
+        <li><a href="/support/">Support</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Legal</div>
+      <ul class="footer-links">
+        <li><a href="/privacy/">Privacy policy</a></li>
+        <li><a href="/terms/">Terms of service</a></li>
+        <li><a href="/delete-account/">Delete account</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-text">&copy; <span data-year></span> FITLYTIX. All rights reserved.</p>
+    <p class="footer-text">Made for gyms in India.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/assets/config.js"></script>
+<script src="/assets/auth.js"></script>
+<script src="/assets/site.js"></script>
+<script>
+/* ============================================================================
+   SETUP REQUIRED. The request is written to Supabase. No mail client is ever
+   opened. Nothing is deleted on submit: the row is stored unconfirmed, and a
+   confirmation email goes to the address given, which is what proves the
+   requester actually controls that account.
+
+   Run this in the Supabase SQL editor:
+
+     create table public.deletion_requests (
+       id            uuid primary key default gen_random_uuid(),
+       created_at    timestamptz not null default now(),
+       email         text not null,
+       gym           text,
+       scope         text,
+       reason        text,
+       confirm_token uuid not null default gen_random_uuid(),
+       confirmed_at  timestamptz
+     );
+
+     alter table public.deletion_requests enable row level security;
+
+     -- Anyone may request. Nobody may read requests back from the browser,
+     -- which stops the table being used to find out who has an account.
+     create policy "anon can request deletion"
+       on public.deletion_requests for insert to anon with check (true);
+
+   Then add a webhook on Insert that emails confirm_token as a link through
+   Resend. Only mark confirmed_at and delete the account once that link is
+   opened. Google Play requires this page to work without a login, which it
+   does, but the confirmation step is what stops anyone deleting someone
+   else's account by typing their address.
+   ============================================================================ */
+
+(function () {
+  'use strict';
+
+  var supportEmail = window.FITLYTIX.site.supportEmail;
+  document.getElementById('support-link').href = 'mailto:' + supportEmail;
+
+  var form = document.getElementById('deletion-form');
+  var errorBox = document.getElementById('form-error');
+  var button = document.getElementById('del-submit');
+  var label = document.getElementById('del-submit-text');
+
+  function fail(message) {
+    errorBox.innerHTML = message;
+    errorBox.hidden = false;
+    button.disabled = false;
+    button.classList.remove('is-loading');
+    label.textContent = 'Send deletion request';
+  }
+
+  form.addEventListener('submit', async function (event) {
+    event.preventDefault();
+    errorBox.hidden = true;
+
+    var email = document.getElementById('email').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return fail('Enter the email address on your account.');
+    }
+
+    button.disabled = true;
+    button.classList.add('is-loading');
+    label.textContent = 'Sending';
+
+    var response = await FitlytixAuth.client
+      .from(window.FITLYTIX.deletionTable)
+      .insert({
+        email: email,
+        gym: document.getElementById('gym').value.trim(),
+        scope: document.getElementById('scope').value,
+        reason: document.getElementById('reason').value.trim(),
+      });
+
+    if (response.error) {
+      return fail('We could not send that just now. Please email us at <strong>' +
+                  supportEmail + '</strong> and we will handle it by hand.');
+    }
+
+    document.getElementById('del-sent-email').textContent = email;
+    form.style.display = 'none';
+    document.getElementById('del-sent').style.display = 'block';
+  });
+})();
+</script>
+
+</body>
+</html>
