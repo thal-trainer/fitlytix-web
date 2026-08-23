@@ -92,8 +92,6 @@
           </h2>
           <p class="card-desc mb-5">We reply within two working days.</p>
 
-          <div class="alert alert-error" id="form-error" role="alert" hidden></div>
-
           <form id="demo-form" novalidate>
             <div class="field">
               <label class="field-label" for="gym">Gym name *</label>
@@ -147,6 +145,8 @@
                 </span>
               </label>
             </div>
+
+            <div class="alert alert-error" id="form-error" role="alert" hidden></div>
 
             <button class="btn btn-primary btn-block" type="submit" id="submit-btn">
               <span class="btn-spinner"></span>
@@ -277,7 +277,10 @@
   function fail(message, focusId) {
     errorBox.innerHTML = message;
     errorBox.hidden = false;
+    // The box sits just above the button, so on a long form a submit failure
+    // can land below the fold. Field errors scroll themselves through focus.
     if (focusId) document.getElementById(focusId).focus();
+    else errorBox.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
 
   function resetButton() {

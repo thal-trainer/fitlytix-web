@@ -43,6 +43,9 @@ window.FitlytixAuth = (function () {
       detectSessionInUrl: false,
       persistSession: false,
       autoRefreshToken: false,
+      // Its own storage key, so the two clients cannot share state. Without
+      // this the SDK warns about two instances under one key.
+      storageKey: 'sb-fitlytix-public-noauth',
     },
   });
 
