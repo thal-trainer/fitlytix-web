@@ -309,12 +309,27 @@
     button.classList.add('is-loading');
     label.textContent = 'Sending';
 
-    var response = await FitlytixAuth.client.from(window.FITLYTIX.leadsTable).insert(lead);
+    // publicClient, not client: the shared client persists sessions, so a
+    // visitor who has ever followed a Supabase email link on this domain
+    // would send a stale user token here and get a 401 instead of a lead.
+    var response = await FitlytixAuth.publicClient.from(window.FITLYTIX.leadsTable).insert(lead);
 
     if (response.error) {
-      // Say so plainly. Showing a success screen for a lost lead is worse.
-      fail('We could not send that just now. Please email us at <strong>' +
-           window.FITLYTIX.site.supportEmail + '</strong> and we will pick it up.');
+      // Log the raw error. Without it this failure is undiagnosable, because
+      // every cause looks identical from the visitor's side of the form.
+      console.error('Demo request failed', response.status, response.error);
+
+      // A blocked or offline request is worth naming, since the visitor can
+      // act on that one themselves. Everything else gets the plain fallback:
+      // showing a success screen for a lost lead is worse than an apology.
+      var blocked = !navigator.onLine ||
+        /failed to fetch|networkerror|load failed/i.test(response.error.message || '');
+
+      fail(blocked
+        ? 'We could not reach our server. Check your connection, and any ad blocker or VPN, then try again. If it keeps failing, email us at <strong>' +
+          window.FITLYTIX.site.supportEmail + '</strong>.'
+        : 'We could not send that just now. Please email us at <strong>' +
+          window.FITLYTIX.site.supportEmail + '</strong> and we will pick it up.');
       resetButton();
       return;
     }

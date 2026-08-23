@@ -29,6 +29,24 @@ window.FitlytixAuth = (function () {
   });
 
   /**
+   * A second client, used by the public forms (demo request, delete account).
+   *
+   * The client above persists sessions, so once a visitor has followed any
+   * Supabase email link on this domain the SDK attaches their user token to
+   * every later request. A stale token then fails those forms with a 401, and
+   * even a valid one fails the `to anon` insert policy, because the role is
+   * authenticated rather than anon. This client holds no session at all, so
+   * the public forms always submit as anon.
+   */
+  var publicClient = window.supabase.createClient(config.supabase.url, config.supabase.anonKey, {
+    auth: {
+      detectSessionInUrl: false,
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+
+  /**
    * Reads auth data from both the URL fragment and the query string.
    * Tokens and errors arrive in the fragment; `type=client` is a query param
    * we set ourselves via redirectTo when inviting a client rather than a
@@ -172,6 +190,7 @@ window.FitlytixAuth = (function () {
 
   return {
     client: client,
+    publicClient: publicClient,
     readAuthParams: readAuthParams,
     establishSession: establishSession,
     clearFragment: clearFragment,
