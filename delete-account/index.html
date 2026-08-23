@@ -71,9 +71,11 @@
 
       <h2>Option 2: Request it here</h2>
       <p>
-        No app or login needed. Fill this in and we will email that address a
-        confirmation link. Nothing is deleted until you click it, which is how
-        we make sure nobody can close someone else's account.
+        No app or login needed. Give us the address on your account and we will
+        email you a link. That link lists every gym and role held on the
+        address, so you choose what goes and what stays, the same as the app
+        does. Nothing is deleted until you confirm there, which is how we make
+        sure nobody can close someone else's account.
       </p>
 
       <form id="deletion-form" class="card mb-5" style="max-width:520px;">
@@ -83,24 +85,6 @@
                  autocomplete="email" placeholder="you@example.com" required />
         </div>
 
-        <div class="field">
-          <label class="field-label" for="gym">Your gym</label>
-          <input class="input" type="text" id="gym" placeholder="e.g. Thal Fitness Coliseum" />
-        </div>
-
-        <div class="field">
-          <label class="field-label" for="scope">What should we delete</label>
-          <select class="select" id="scope">
-            <option value="Everything - full account deletion">Everything, delete my account</option>
-            <option value="Health and training data only, keep the account">Health and training data only, keep my account</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label class="field-label" for="reason">Anything you want to tell us (optional)</label>
-          <textarea class="textarea" id="reason" placeholder="Optional"></textarea>
-        </div>
-
         <div class="alert alert-error" id="form-error" role="alert" hidden></div>
 
         <button class="btn btn-primary btn-block" type="submit" id="del-submit">
@@ -108,8 +92,8 @@
           <span id="del-submit-text">Send deletion request</span>
         </button>
         <p class="field-hint">
-          We will email that address to confirm it is really you. Nothing is
-          deleted until you click the link in that email.
+          We will email that address to confirm it is really you. You pick what
+          to delete from that email. Nothing is removed before then.
         </p>
       </form>
 
@@ -288,6 +272,7 @@
     button.disabled = false;
     button.classList.remove('is-loading');
     label.textContent = 'Send deletion request';
+    errorBox.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
 
   form.addEventListener('submit', async function (event) {
@@ -310,9 +295,12 @@
       .from(window.FITLYTIX.deletionTable)
       .insert({
         email: email,
-        gym: document.getElementById('gym').value.trim(),
-        scope: document.getElementById('scope').value,
-        reason: document.getElementById('reason').value.trim(),
+        // Fixed, as the app's Delete Account screen sends it. Which gyms and
+        // roles sit behind this address is not something the page can know or
+        // the visitor should have to type: the address is the only thing that
+        // has been proved, so the rest is resolved server side and confirmed
+        // from the email.
+        scope: 'account',
       });
 
     if (response.error) {
