@@ -1,14 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="FITLYTIX">
-  <rect width="32" height="32" rx="7" fill="#000000"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="FITLYTIX">
+  <rect width="512" height="512" rx="112" fill="#000000"/>
   <!--
-    The logo's equaliser mark, cut down to five bars. The full lockup has eight,
-    which turns to mush at the 16px a browser tab actually renders.
+    The equaliser mark from assets/logo-mark.png, traced to vector so it stays
+    crisp at the 16px a browser tab actually renders. Bar geometry below is in
+    the source PNG's own pixel coordinates; the transform drops that content
+    box (17,1 222x143) into the centre of the icon at 78% of its width, so this
+    and favicon.png / apple-touch-icon.png line up exactly.
   -->
-  <g fill="#F2ECD8">
-    <rect x="5"  y="12"   width="3" height="8"  rx="1.5"/>
-    <rect x="10" y="8"    width="3" height="16" rx="1.5"/>
-    <rect x="20" y="9"    width="3" height="14" rx="1.5"/>
-    <rect x="25" y="11.5" width="3" height="9"  rx="1.5"/>
+  <g transform="translate(25.876 126.164) scale(1.79085)">
+    <g fill="#F2ECD8">
+      <rect x="17"  y="82" width="18" height="37" rx="9"/>
+      <rect x="49"  y="54" width="19" height="90" rx="9.5"/>
+      <rect x="86"  y="64" width="18" height="55" rx="9"/>
+      <rect x="122" y="32" width="18" height="87" rx="9"/>
+      <rect x="187" y="54" width="19" height="90" rx="9.5"/>
+      <rect x="222" y="82" width="17" height="37" rx="8.5"/>
+    </g>
+    <rect x="154" y="1" width="20" height="118" rx="10" fill="#D4A843"/>
   </g>
-  <rect x="15" y="5" width="3" height="22" rx="1.5" fill="#D4A843"/>
 </svg>
