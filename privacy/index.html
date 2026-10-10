@@ -17,6 +17,8 @@
   <link rel="canonical" href="https://fitlytix.in/privacy/" />
 
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="/favicon.png" type="image/png" sizes="512x512" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -27,18 +29,24 @@
 <!--
   ============================================================================
   BEFORE PUBLISHING: replace every [BRACKETED] placeholder below.
-  The same placeholders appear in /terms/, /delete-account/ and /support/.
+  The same placeholders appear in /terms/.
 
     [LEGAL ENTITY]        registered company or proprietorship name
     [REGISTERED ADDRESS]  full postal address
     [GRIEVANCE OFFICER]   name of the DPDP grievance officer
-    support@fitlytix.in       e.g. privacy@fitlytix.in
+    [CITY]                city whose courts have jurisdiction (/terms/)
     [EFFECTIVE DATE]      date this version takes effect
 
+  This page is the canonical text. The app renders the same document from
+  src/screens/PrivacyPolicyScreen.js in the app repo; change a clause here and
+  change it there in the same pass, then bump LEGAL_VERSION in the app's
+  src/lib/legal.js so signed-in users re-accept.
+
   This document reflects how the product actually works today (Supabase for
-  database and auth, Resend for email, GitHub Pages for this site). If any of
-  those change, this page has to change with them. It is a solid starting
-  draft, not a substitute for review by a lawyer familiar with the DPDP Act.
+  database and auth, Expo with Apple APNs and Google FCM for push, Resend for
+  email, GitHub Pages for this site). If any of those change, this page has to
+  change with them. It is a solid starting draft, not a substitute for review
+  by a lawyer familiar with the DPDP Act.
   ============================================================================
 -->
 
@@ -109,7 +117,7 @@
               <td>Data fiduciary / controller</td>
             </tr>
             <tr>
-              <td>Website analytics and security logs</td>
+              <td>Website server logs and security records</td>
               <td>FITLYTIX</td>
               <td>Data fiduciary / controller</td>
             </tr>
@@ -136,15 +144,17 @@
       <h3>Health and fitness information</h3>
       <p>
         This is sensitive data and we treat it accordingly. Depending on what
-        your trainer records, it may include:
+        you and your trainer record, it may include:
       </p>
       <ul>
-        <li>Height, weight, body measurements and derived values such as BMI</li>
+        <li>Date of birth and biological sex</li>
+        <li>Height, weight, body fat and body measurements, including separate left and right limb measurements</li>
+        <li>Derived values such as BMI</li>
         <li>Fitness level and training goals</li>
         <li>Injuries, physical limitations and health notes relevant to safe training</li>
-        <li>Workout programs assigned to you and your logged performance</li>
-        <li>Nutrition and meal plans, including macronutrient targets</li>
-        <li>Session bookings and attendance history</li>
+        <li>Workout programs assigned to you, and the sets, reps and weights logged against them</li>
+        <li>Nutrition and meal plans, macronutrient targets, and which meals you marked as eaten</li>
+        <li>Session bookings, attendance history and session notes</li>
       </ul>
       <p>
         Health information is entered by you or by your trainer on your behalf.
@@ -154,6 +164,7 @@
       <h3>Technical information</h3>
       <ul>
         <li>Device type, operating system and app version</li>
+        <li>A push notification token, so the app can reach your device</li>
         <li>IP address and approximate region, from server logs</li>
         <li>Timestamps of sign-in and key actions, kept for security and troubleshooting</li>
       </ul>
@@ -163,7 +174,7 @@
         <li>Payment card numbers, which we never see or store</li>
         <li>Government identity numbers such as Aadhaar or PAN</li>
         <li>Precise GPS location or background location tracking</li>
-        <li>Your contacts, photos, microphone or camera, unless you explicitly attach something</li>
+        <li>Your contacts, photo library, microphone or camera. The app has no upload or attachment feature and requests no media permissions</li>
       </ul>
 
       <h2>4. Why we use it</h2>
@@ -198,6 +209,21 @@
               <td>Supabase</td>
               <td>Database, authentication and file storage</td>
               <td>All account and training data</td>
+            </tr>
+            <tr>
+              <td>Expo</td>
+              <td>Push notification delivery</td>
+              <td>Device push token and notification contents, such as a session time</td>
+            </tr>
+            <tr>
+              <td>Apple Push Notification service</td>
+              <td>Delivering notifications to iPhones</td>
+              <td>Device token and notification contents</td>
+            </tr>
+            <tr>
+              <td>Google Firebase Cloud Messaging</td>
+              <td>Delivering notifications to Android devices</td>
+              <td>Device token and notification contents</td>
             </tr>
             <tr>
               <td>Resend</td>
@@ -274,11 +300,20 @@
 
       <h2>10. Children</h2>
       <p>
-        FITLYTIX is not intended for anyone under 18. A gym may train a minor
-        only with verifiable consent from a parent or guardian, and that gym is
-        responsible for obtaining it. Tell us at
-        <a href="mailto:support@fitlytix.in">support@fitlytix.in</a> if you believe we
-        hold a child's data without consent and we will delete it.
+        FITLYTIX is not intended for anyone under 15. An account for anyone
+        under 18 may only be created by a gym that has verified their age and
+        obtained verifiable consent from a parent or guardian. That verification
+        and consent is the gym's responsibility as the controller of client
+        records, not ours.
+      </p>
+      <p>
+        We do not carry out behavioural monitoring, profiling or targeted
+        advertising towards anyone, of any age.
+      </p>
+      <p>
+        Tell us at <a href="mailto:support@fitlytix.in">support@fitlytix.in</a>
+        if you believe we hold a child's data without consent and we will delete
+        it.
       </p>
 
       <h2>11. Cookies</h2>
